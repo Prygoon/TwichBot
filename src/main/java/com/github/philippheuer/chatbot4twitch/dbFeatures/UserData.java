@@ -92,7 +92,7 @@ public class UserData {
                 PreparedStatement statement = dbWorker.getConnection().prepareStatement(GET_WORD_COUNT);
                 ResultSet resultSet = statement.executeQuery();
                 while (resultSet.next()) {
-                    wordCount += resultSet.getInt("word_count");
+                    wordCount = resultSet.getInt("word_count");
                 }
                 dbWorker.getConnection().close();
                 return wordCount;
@@ -117,7 +117,7 @@ public class UserData {
                 PreparedStatement statement = dbWorker.getConnection().prepareStatement(GET_MESSAGE_COUNT);
                 ResultSet resultSet = statement.executeQuery();
                 while (resultSet.next()) {
-                    messageCount += resultSet.getInt("message_count");
+                    messageCount = resultSet.getInt("message_count");
                 }
                 dbWorker.getConnection().close();
                 return messageCount;
@@ -138,7 +138,7 @@ public class UserData {
             PreparedStatement statement = dbWorker.getConnection().prepareStatement(GET_COPYPASTE_COUTER);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                copypasteCount += resultSet.getInt("copypaste_count");
+                copypasteCount = resultSet.getInt("copypaste_count");
             }
             dbWorker.getConnection().close();
         } catch (SQLException e) {

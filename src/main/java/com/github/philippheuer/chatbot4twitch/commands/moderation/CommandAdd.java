@@ -58,15 +58,21 @@ public class CommandAdd extends Command {
 
         // Prepare Command
         DynamicCommand dynamicCommand;
-
-        // Command Type [Echo - Simply write a static text]
-        if (pType.equals("echo")) {
-            // Create Command
-            dynamicCommand = new DynamicCommand(pCommandName, CommandPermission.SUBSCRIBER, TypeConvert.combineStringArray(pResponse, " "));
-        } else {
-            // Unknown Type
-            return;
+        CommandPermission permission;
+        // Command Type
+        switch (pType) {
+            case "all":
+                permission = CommandPermission.EVERYONE;
+                break;
+            case "sub":
+                permission = CommandPermission.SUBSCRIBER;
+                break;
+            default:
+                permission = CommandPermission.MODERATOR;
+                break;
         }
+        // Create Command
+        dynamicCommand = new DynamicCommand(pCommandName, permission, TypeConvert.combineStringArray(pResponse, " "));
 
         // Register Command
         getTwitchClient().getCommandHandler().registerCommand(dynamicCommand);

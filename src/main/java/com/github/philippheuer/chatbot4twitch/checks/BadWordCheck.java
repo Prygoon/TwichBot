@@ -3,8 +3,8 @@ package com.github.philippheuer.chatbot4twitch.checks;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.UserData;
 import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
 
-import static com.github.philippheuer.chatbot4twitch.checks.UserModeratorCheck.isMod;
-import static com.github.philippheuer.chatbot4twitch.checks.UserSubscribtionCheck.isSub;
+import static com.github.philippheuer.chatbot4twitch.checks.UserPermissionCheck.isMod;
+import static com.github.philippheuer.chatbot4twitch.checks.UserPermissionCheck.isSub;
 
 public class BadWordCheck {
     public static boolean isQuest(String message) {
@@ -31,16 +31,19 @@ public class BadWordCheck {
 
     public static int copyPasteCount(ChannelMessageEvent event) {
         UserData userData = new UserData(event);
-        if (isSub(event) || isMod(event) || event.getUser().getName().equals(event.getChannel().getName())) {
+        int copypasteCounter = userData.getCopypasteCount();
+        if (isSub(event) || isMod(event)) {
             return 0;
         }
         if (userData.getPreviousMessage(event) != null) {
-            if ((leviAlg(userData.getPreviousMessage(event), event.getMessage()) < event.getMessage().length() / 3) && (event.getMessage().length() > 20)) {
+            if ((leviAlg(userData.getPreviousMessage(event), event.getMessage()) < (event.getMessage().length() / 4)) && (event.getMessage().length() > 25)) {
                 userData.incrementCopypasteCount(event);
+                copypasteCounter++;
             } else {
                 userData.zeroingCopypasteCount(event);
+                copypasteCounter = 0;
             }
-            return userData.getCopypasteCount();
+            return copypasteCounter;
         }
         return 0;
     }

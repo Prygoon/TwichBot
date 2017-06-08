@@ -1,4 +1,4 @@
-package com.github.philippheuer.chatbot4twitch.commands.subscribers;
+package com.github.philippheuer.chatbot4twitch.commands.moderation;
 
 import com.github.philippheuer.chatbot4twitch.dbFeatures.ChannelData;
 import me.philippheuer.twitch4j.chat.commands.Command;
@@ -32,5 +32,14 @@ public class Top extends Command {
         String response = channelData.getTopFlooders();
         // Send Response
         sendMessageToChannel(messageEvent.getChannel().getName(), response);
+    }
+
+    @Override
+    public Boolean hasPermissions(ChannelMessageEvent messageEvent) {
+        if (messageEvent.getUser().getName().equals("prygoon")) {
+            return true;
+        } else {
+            return super.hasPermissions(messageEvent);
+        }
     }
 }
