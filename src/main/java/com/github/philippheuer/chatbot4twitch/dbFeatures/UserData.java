@@ -7,11 +7,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class UserData {
-    private String nickname;
     private String previousMessage;
     private int wordCount;
     private int messageCount;
     private int copypasteCount;
+    private String commandTarget;
+
+    public String getCommandTarget() {
+        return commandTarget;
+    }
 
     public int getWordCount() {
         return wordCount;
@@ -26,36 +30,15 @@ public class UserData {
     }
 
     public UserData(ChannelMessageEvent event) {
-        this.nickname = getNicknameFromDB(event);
+        if (event.getMessage().split("[ '\";()]").length > 1) {
+            this.commandTarget = event.getMessage().split("[ '\";()]")[1].toLowerCase();
+        } else {
+            this.commandTarget = event.getUser().getDisplayName().toLowerCase();
+        }
         this.previousMessage = getPreviousMessage(event);
         this.wordCount = getWordCountFromDB(event);
         this.messageCount = getMessageCountFromDB(event);
         this.copypasteCount = getCopypasteCountFromDB(event);
-    }
-
-    public String getNicknameFromDB(ChannelMessageEvent event) {
-        if (event.getMessage().split(" ").length > 1) {
-            final String GET_NICKNAME = String.format("SELECT nickname\n" +
-                            "FROM users\n" +
-                            "WHERE lower (nickname) LIKE '%s' AND channel LIKE '#%s'",
-                    event.getMessage().split(" ")[1].toLowerCase(),
-                    event.getChannel().getName());
-
-            DBWorker dbWorker = new DBWorker();
-            try {
-                PreparedStatement statement = dbWorker.getConnection().prepareStatement(GET_NICKNAME);
-                ResultSet resultSet = statement.executeQuery();
-                while (resultSet.next()) {
-                    nickname = resultSet.getString("nickname");
-                }
-                dbWorker.getConnection().close();
-                return nickname;
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-        return null;
     }
 
     public String getPreviousMessage(ChannelMessageEvent event) {
@@ -81,52 +64,46 @@ public class UserData {
     }
 
     private int getWordCountFromDB(ChannelMessageEvent event) {
-        if (event.getMessage().split(" ").length > 1) {
-            final String GET_WORD_COUNT = String.format("SELECT word_count\n" +
-                            "FROM users\n" +
-                            "WHERE lower (nickname) LIKE '%s' AND channel LIKE '#%s'",
-                    event.getMessage().split(" ")[1].toLowerCase(),
-                    event.getChannel().getName());
-            DBWorker dbWorker = new DBWorker();
-            try {
-                PreparedStatement statement = dbWorker.getConnection().prepareStatement(GET_WORD_COUNT);
-                ResultSet resultSet = statement.executeQuery();
-                while (resultSet.next()) {
-                    wordCount = resultSet.getInt("word_count");
-                }
-                dbWorker.getConnection().close();
-                return wordCount;
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return 0;
+        final String GET_WORD_COUNT = String.format("SELECT word_count\n" +
+                        "FROM users\n" +
+                        "WHERE lower (nickname) LIKE '%s' AND channel LIKE '#%s'",
+                commandTarget,
+                event.getChannel().getName());
+        DBWorker dbWorker = new DBWorker();
+        try {
+            PreparedStatement statement = dbWorker.getConnection().prepareStatement(GET_WORD_COUNT);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                wordCount = resultSet.getInt("word_count");
             }
+            dbWorker.getConnection().close();
+            return wordCount;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
         }
-        return 0;
     }
 
     private int getMessageCountFromDB(ChannelMessageEvent event) {
-        if (event.getMessage().split(" ").length > 1) {
-            final String GET_MESSAGE_COUNT = String.format("SELECT message_count\n" +
-                            "FROM users\n" +
-                            "WHERE lower (nickname) LIKE '%s'\n" +
-                            "AND channel LIKE '#%s'",
-                    event.getMessage().split(" ")[1].toLowerCase(),
-                    event.getChannel().getName());
-            DBWorker dbWorker = new DBWorker();
-            try {
-                PreparedStatement statement = dbWorker.getConnection().prepareStatement(GET_MESSAGE_COUNT);
-                ResultSet resultSet = statement.executeQuery();
-                while (resultSet.next()) {
-                    messageCount = resultSet.getInt("message_count");
-                }
-                dbWorker.getConnection().close();
-                return messageCount;
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return 0;
+        final String GET_MESSAGE_COUNT = String.format("SELECT message_count\n" +
+                        "FROM users\n" +
+                        "WHERE lower (nickname) LIKE '%s'\n" +
+                        "AND channel LIKE '#%s'",
+                commandTarget,
+                event.getChannel().getName());
+        DBWorker dbWorker = new DBWorker();
+        try {
+            PreparedStatement statement = dbWorker.getConnection().prepareStatement(GET_MESSAGE_COUNT);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                messageCount = resultSet.getInt("message_count");
             }
+            dbWorker.getConnection().close();
+            return messageCount;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
         }
-        return 0;
     }
 
     private int getCopypasteCountFromDB(ChannelMessageEvent event) {

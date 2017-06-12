@@ -14,10 +14,16 @@ import java.util.List;
 public class ChannelData {
     private String channelName;
     private ChannelMessageEvent event;
+    private String commandTarget;
 
     public ChannelData(ChannelMessageEvent event) {
         this.event = event;
         this.channelName = event.getChannel().getName();
+        if (event.getMessage().split("[ '\";()]").length > 1) {
+            this.commandTarget = event.getMessage().split("[ '\";()]")[1].toLowerCase();
+        } else {
+            this.commandTarget = event.getUser().getName().toLowerCase();
+        }
     }
 
     public String getTopFlooders() {
@@ -55,10 +61,6 @@ public class ChannelData {
         }
     }
 
-    public String getChannelName() {
-        return channelName;
-    }
-
     public String getFirstDate() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
         final String GET_FIRST_DATE = String.format("SELECT timest\n" +
@@ -85,11 +87,11 @@ public class ChannelData {
         ArrayList<String> list = new ArrayList<>();
         SimpleDateFormat dateFormat = new SimpleDateFormat("[yyyy-MM-dd HH:mm:ss]");
         final String GET_LOG = String.format("SELECT timest, nickname, message\n" +
-                        "FROM \"#%s\" WHERE lower (nickname) = '%s'\n" +
+                        "FROM \"#%s\" WHERE lower (nickname) = \'%s\'\n" +
                         "ORDER BY message_id DESC\n" +
                         "LIMIT 3",
-                event.getChannel().getName(),
-                event.getMessage().split(" ")[1].toLowerCase());
+                channelName,
+                commandTarget);
         DBWorker dbWorker = new DBWorker();
         try {
             PreparedStatement statement = dbWorker.getConnection().prepareStatement(GET_LOG);

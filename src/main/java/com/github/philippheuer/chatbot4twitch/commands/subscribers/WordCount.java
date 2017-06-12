@@ -33,7 +33,7 @@ public class WordCount extends Command {
 
         UserData userData = new UserData(messageEvent);
         ChannelData channelData = new ChannelData(messageEvent);
-        String nickname = userData.getNicknameFromDB(messageEvent);
+        String nickname = userData.getCommandTarget();
         String firstDate = channelData.getFirstDate();
         String response;
         int wordCount = userData.getWordCount();
