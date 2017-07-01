@@ -11,13 +11,17 @@ public class ChannelNotificationOnSubscription {
      */
     @EventSubscriber
     public void onSubscription(SubscriptionEvent event) {
-        String message = "";
-        SubPlan subPlan = event.getSubscription().getSubPlan().get();
+        String message;
+        SubPlan subPlan = null;
         int streak = event.getSubscription().getStreak().get();
         int streakEnds = streak;
         String[] months = {"месяц", "месяца", "месяцев"};
         String plan = "";
         String month;
+        if (event.getSubscription().getSubPlan().isPresent()) {
+            subPlan = event.getSubscription().getSubPlan().get();
+        }
+        assert subPlan != null;
         switch (subPlan) {
             case PRIME: {
                 plan = "Twitch Prime";
@@ -37,16 +41,12 @@ public class ChannelNotificationOnSubscription {
             }
         }
 
-        while (streakEnds > 100) {
-            streakEnds %= 100;
-        }
+        streakEnds %= 100;
 
-        if (streakEnds >= 11 && streak <= 19) {
+        if (streakEnds >= 11 && streakEnds <= 19) {
             month = months[2];
         } else {
-            while (streakEnds > 10) {
                 streakEnds %= 10;
-            }
             switch (streakEnds) {
                 case 1: {
                     month = months[0];
@@ -63,14 +63,13 @@ public class ChannelNotificationOnSubscription {
             }
         }
 
-        // New Subscription
-        if (!event.getSubscription().getStreak().isPresent()) {
-            message = String.format(" Поздравляю @%s , ты стал подписчиком на канале %s за %s!", event.getUser().getDisplayName(), event.getChannel().getDisplayName(), plan);
-        }
         // Resubscription
         if (event.getSubscription().getStreak().isPresent() && streak > 1) {
-
-            message = String.format("Поздравляю, @%s , ты продлил подписку на %s за %s и твой стаж подписки уже %s %s!", event.getUser().getDisplayName(), event.getChannel().getDisplayName(), plan, streak, month);
+            message = String.format("Поздравляю, @%s , ты продлил(а) подписку на %s за %s и твой стаж подписки уже %s %s!", event.getUser().getDisplayName(), event.getChannel().getDisplayName(), plan, streak, month);
+        } else {
+            // New Subscription
+            //if (event.getSubscription().getStreak().isPresent() && streak <= 1) {
+            message = String.format("Поздравляю @%s , ты стал(а) подписчиком на канале %s за %s!", event.getUser().getDisplayName(), event.getChannel().getDisplayName(), plan);
         }
 
         // Send Message

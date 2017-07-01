@@ -2,14 +2,18 @@ package com.github.philippheuer.chatbot4twitch.dbFeatures;
 
 import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
 import me.philippheuer.twitch4j.model.User;
+
 import java.sql.*;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 
 import static com.github.philippheuer.chatbot4twitch.checks.ChannelStatusCheck.isAlive;
 
 public class DBLogger {
 
     public static void messageLoging(ChannelMessageEvent event) {
+        List<String> bots = Arrays.asList("nightbot", "mooboot", "lilerine");
         String channelName = event.getChannel().getName();
         String userName = event.getUser().getDisplayName();
         int wordCount = event.getMessage().split(" ").length;
@@ -44,7 +48,7 @@ public class DBLogger {
             statement.setString(2, userName);
             statement.setString(3, event.getMessage());
             statement.execute();
-            if ((!userName.toLowerCase().equals("nightbot")) && (isAlive(event))) {
+            if (!bots.contains(userName.toLowerCase()) && isAlive(event)) {
                 statement = worker.getConnection().prepareStatement(MESSAGE_COUNTER);
                 statement.execute();
                 worker.getConnection().close();

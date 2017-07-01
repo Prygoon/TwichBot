@@ -16,7 +16,7 @@ public class Top extends Command {
         setCommand("top");
         setCommandAliases(new String[]{"topflooders", "flooders"});
         setCategory("moderation");
-        setDescription("Displays top 5 flooders on channel.");
+        setDescription("Показывает топ 5 флудеров на канале.");
         getRequiredPermissions().add(CommandPermission.MODERATOR);
         setUsageExample("");
     }

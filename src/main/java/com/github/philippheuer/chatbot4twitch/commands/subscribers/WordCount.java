@@ -17,7 +17,7 @@ public class WordCount extends Command {
         setCommand("wordcount");
         setCommandAliases(new String[]{"wc"});
         setCategory("subscriber");
-        setDescription("Response with user's stats");
+        setDescription("Показывает статистику пользователя.");
         getRequiredPermissions().add(CommandPermission.SUBSCRIBER);
         getRequiredPermissions().add(CommandPermission.MODERATOR);
         getRequiredPermissions().add(CommandPermission.BROADCASTER);
@@ -33,7 +33,7 @@ public class WordCount extends Command {
 
         UserData userData = new UserData(messageEvent);
         ChannelData channelData = new ChannelData(messageEvent);
-        String nickname = userData.getCommandTarget();
+        String nickname = userData.getNicknameFromDB(messageEvent);
         String firstDate = channelData.getFirstDate();
         String response;
         int wordCount = userData.getWordCount();

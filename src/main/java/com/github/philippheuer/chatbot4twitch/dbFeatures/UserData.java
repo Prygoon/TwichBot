@@ -12,6 +12,7 @@ public class UserData {
     private int messageCount;
     private int copypasteCount;
     private String commandTarget;
+    private String nickname;
 
     public String getCommandTarget() {
         return commandTarget;
@@ -39,6 +40,28 @@ public class UserData {
         this.wordCount = getWordCountFromDB(event);
         this.messageCount = getMessageCountFromDB(event);
         this.copypasteCount = getCopypasteCountFromDB(event);
+        this.nickname = getNicknameFromDB(event);
+    }
+
+    public String getNicknameFromDB(ChannelMessageEvent event) {
+        final String GET_NICKNAME = String.format("SELECT nickname\n" +
+                        "FROM users\n" +
+                        "WHERE lower (nickname) LIKE '%s' AND channel LIKE '#%s'",
+                commandTarget,
+                event.getChannel().getName());
+        DBWorker dbWorker = new DBWorker();
+        try {
+            PreparedStatement statement = dbWorker.getConnection().prepareStatement(GET_NICKNAME);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                nickname = resultSet.getString("nickname");
+            }
+            dbWorker.getConnection().close();
+            return nickname;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 
     public String getPreviousMessage(ChannelMessageEvent event) {

@@ -10,6 +10,7 @@ public class WriteChannelChatToConsole {
     @EventSubscriber
     public void onChannelMessage(ChannelMessageEvent event) {
         System.out.println("Channel [" +event.getChannel().getDisplayName() + "] - UserData[" + event.getUser().getDisplayName() + "] - Message [" + event.getMessage() + "]");
+        //System.out.println(event.toString());
     }
-    
+
 }

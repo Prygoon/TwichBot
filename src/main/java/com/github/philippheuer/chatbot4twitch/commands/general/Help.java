@@ -4,6 +4,7 @@ import me.philippheuer.twitch4j.chat.commands.Command;
 import me.philippheuer.twitch4j.chat.commands.CommandPermission;
 import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class Help extends Command {
@@ -17,7 +18,7 @@ public class Help extends Command {
         setCommand("help");
         setCommandAliases(new String[]{});
         setCategory("general");
-        setDescription("Displays information about a command.");
+        setDescription("Показывает информацию о команде.");
         getRequiredPermissions().add(CommandPermission.EVERYONE);
         setUsageExample("");
     }
@@ -39,15 +40,21 @@ public class Help extends Command {
         if (cmd.isPresent()) {
             if (cmd.get().hasPermissions(messageEvent)) {
                 // UserData has Permissions for Command
-                String response = String.format("Command: %s | Description: %s", cmd.get().getCommand(), cmd.get().getDescription());
+                String response = String.format("Команда: %s | Описание: %s", cmd.get().getCommand(), cmd.get().getDescription());
                 sendMessageToChannel(messageEvent.getChannel().getName(), response);
             } else {
                 // UserData has no permissions for this command
                 return;
             }
         } else {
-            String response = String.format("%s is not a valid command.", cmdName);
-            sendMessageToChannel(messageEvent.getChannel().getName(), response);
+            /*String response;
+            if (cmdName == null) {
+                response = String.format("@%s %s - нет такой команды.", messageEvent.getUser().getDisplayName(), cmdName);
+            } else {
+                response = String.format("@%s Укажите название команды", messageEvent.getUser().getDisplayName());
+            }
+            sendMessageToChannel(messageEvent.getChannel().getName(), response);*/
+            return;
         }
     }
 }

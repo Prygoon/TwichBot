@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class DB_Settings {
+class DB_Settings {
 
     private static String BASE_URL;
     private static String BASE_USERNAME;
@@ -12,7 +12,7 @@ public class DB_Settings {
 
     static {
         try {
-            BufferedReader reader = new BufferedReader(new FileReader("/home/prygoon/DB_Settings"));
+            BufferedReader reader = new BufferedReader(new FileReader("/home/appuser/DB_Settings"));
             BASE_URL = reader.readLine();
             BASE_USERNAME = reader.readLine();
             BASE_PASS = reader.readLine();

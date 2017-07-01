@@ -2,6 +2,8 @@ package com.github.philippheuer.chatbot4twitch;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.github.philippheuer.chatbot4twitch.commands.general.Commands;
+import com.github.philippheuer.chatbot4twitch.commands.general.Help;
 import com.github.philippheuer.chatbot4twitch.commands.moderation.CommandAdd;
 import com.github.philippheuer.chatbot4twitch.commands.moderation.CommandRemove;
 import com.github.philippheuer.chatbot4twitch.commands.moderation.LastLog;
@@ -53,12 +55,13 @@ public class Bot {
      */
     public void registerCommands() {
         // General
-        //twitchClient.getCommandHandler().registerCommand(Dice.class);
+        twitchClient.getCommandHandler().registerCommand(Commands.class);
+        //twitchClient.getCommandHandler().registerCommand(Help.class);
         //Subscribers
         twitchClient.getCommandHandler().registerCommand(FollowAge.class);
         twitchClient.getCommandHandler().registerCommand(WordCount.class);
-        twitchClient.getCommandHandler().registerCommand(Top.class);
         // Moderation
+        twitchClient.getCommandHandler().registerCommand(Top.class);
         twitchClient.getCommandHandler().registerCommand(CommandAdd.class);
         twitchClient.getCommandHandler().registerCommand(CommandRemove.class);
         twitchClient.getCommandHandler().registerCommand(LastLog.class);

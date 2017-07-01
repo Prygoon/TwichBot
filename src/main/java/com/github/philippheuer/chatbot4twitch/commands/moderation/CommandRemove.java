@@ -17,7 +17,7 @@ public class CommandRemove extends Command {
         setCommand("removecommand");
         setCommandAliases(new String[]{});
         setCategory("moderation");
-        setDescription("Removes a dynamic command!");
+        setDescription("Удаляет динамическую команду.");
         getRequiredPermissions().add(CommandPermission.MODERATOR);
         getRequiredPermissions().add(CommandPermission.BROADCASTER);
         setUsageExample("removecommand youtube command2 command3");

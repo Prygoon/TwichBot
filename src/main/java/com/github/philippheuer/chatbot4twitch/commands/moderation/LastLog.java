@@ -18,7 +18,7 @@ public class LastLog extends Command {
         setCommand("lastlog");
         setCommandAliases(new String[]{});
         setCategory("moderation");
-        setDescription("Displays user's last 3 messages");
+        setDescription("Показывает 3 последних сообщения пользователя.");
         getRequiredPermissions().add(CommandPermission.MODERATOR);
         getRequiredPermissions().add(CommandPermission.BROADCASTER);
         setUsageExample("");
