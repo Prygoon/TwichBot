@@ -1,5 +1,7 @@
 package com.github.philippheuer.chatbot4twitch.dbFeatures;
 
+import me.philippheuer.twitch4j.events.event.AbstractChannelEvent;
+import me.philippheuer.twitch4j.events.event.ChannelMessageActionEvent;
 import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
 import me.philippheuer.twitch4j.model.User;
 
@@ -12,11 +14,24 @@ import static com.github.philippheuer.chatbot4twitch.checks.ChannelStatusCheck.i
 
 public class DBLogger {
 
-    public static void messageLoging(ChannelMessageEvent event) {
+    public static void messageLoging(AbstractChannelEvent event) {
         List<String> bots = Arrays.asList("nightbot", "mooboot", "lilerine");
         String channelName = event.getChannel().getName();
-        String userName = event.getUser().getDisplayName();
-        int wordCount = event.getMessage().split(" ").length;
+        String message = "";
+        String userName = "";
+        int wordCount = 0;
+
+        if (event instanceof ChannelMessageEvent) {
+            message = ((ChannelMessageEvent) event).getMessage();
+            userName = ((ChannelMessageEvent) event).getUser().getDisplayName();
+            wordCount = ((ChannelMessageEvent) event).getMessage().split(" ").length;
+
+        } else if (event instanceof ChannelMessageActionEvent) {
+            message = "*" + ((ChannelMessageActionEvent) event).getMessage();
+            userName = ((ChannelMessageActionEvent) event).getUser().getDisplayName();
+            wordCount = ((ChannelMessageActionEvent) event).getMessage().split(" ").length;
+        }
+
         final String CREATE_IF_NOT_EXISTS = String.format("CREATE TABLE if not exists \"#%s\" (\n" +
                         "  message_id serial NOT NULL,\n" +
                         "  timest timestamp with time zone NOT NULL,\n" +
@@ -46,7 +61,7 @@ public class DBLogger {
             statement = worker.getConnection().prepareStatement(INSERT_NEW);
             statement.setTimestamp(1, new Timestamp(Calendar.getInstance().getTimeInMillis()));
             statement.setString(2, userName);
-            statement.setString(3, event.getMessage());
+            statement.setString(3, message);
             statement.execute();
             if (!bots.contains(userName.toLowerCase()) && isAlive(event)) {
                 statement = worker.getConnection().prepareStatement(MESSAGE_COUNTER);
@@ -60,9 +75,5 @@ public class DBLogger {
         {
             e.printStackTrace();
         }
-    }
-
-    public static void selfLoging(User user, String message) {
-        user.setDisplayName("Prygoon");
     }
 }
