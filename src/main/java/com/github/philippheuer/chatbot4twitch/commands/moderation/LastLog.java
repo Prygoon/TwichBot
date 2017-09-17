@@ -1,16 +1,22 @@
+
 package com.github.philippheuer.chatbot4twitch.commands.moderation;
 
-import com.github.philippheuer.chatbot4twitch.dbFeatures.ChannelData;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.ChannelLog;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.service.ChannelLogService;
 import me.philippheuer.twitch4j.chat.commands.Command;
 import me.philippheuer.twitch4j.chat.commands.CommandPermission;
 import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
 
+import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.List;
 
 public class LastLog extends Command {
+
     /**
      * Initialize Command
      */
+
     public LastLog() {
         super();
 
@@ -24,40 +30,42 @@ public class LastLog extends Command {
         setUsageExample("");
     }
 
+
     /**
      * executeCommand Logic
      */
+
     @Override
     public void executeCommand(ChannelMessageEvent messageEvent) {
         super.executeCommand(messageEvent);
         // Prepare Response
-        ChannelData channelData = new ChannelData(messageEvent);
-        List<String> lastlog = channelData.getLastLog();
-        if (lastlog.size() != 0) {
-            for (String element : lastlog) {
+        String nickname = messageEvent.getUser().getDisplayName();
+        String channel = "#" + messageEvent.getChannel().getName();
+        String commandTarget = messageEvent.getMessage().split(" ")[1].toLowerCase();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("[yyyy-MM-dd HH:mm:ss]");
+        ChannelLogService logService = new ChannelLogService();
+        List<ChannelLog> lastLog = logService.getLastLog(channel, commandTarget);
+        Collections.reverse(lastLog);
+
+        if (lastLog.size() != 0) {
+            for (ChannelLog log : lastLog) {
+                String date = dateFormat.format(log.getTimestamp());
+                String logNickname = log.getNickname();
+                String logMessage = log.getMessage();
+                String response = date + " " + logNickname + ":" + logMessage;
                 // Send Response
-                if ((messageEvent.getUser()
-                        .getDisplayName().toLowerCase()
-                        .equals("prygoon") || (messageEvent.getUser()
-                        .getDisplayName()
-                        .toLowerCase()
-                        .equals(messageEvent.getChannel().getName().toLowerCase())))) {
-                    sendMessageToChannel(messageEvent.getChannel().getName(), String.format("@%s " + element, messageEvent.getUser().getDisplayName()));
+                if ((nickname.toLowerCase().equals("prygoon") || (nickname.toLowerCase().equals(channel.toLowerCase())))) {
+                    sendMessageToChannel(channel.substring(1), String.format("@%s " + response, nickname));
                 } else {
-                    getTwitchClient().getIrcClient().sendPrivateMessage(messageEvent.getUser().getName(), element);
+                    getTwitchClient().getIrcClient().sendPrivateMessage(nickname, response);
                 }
             }
         } else {
-            if ((messageEvent.getUser()
-                    .getDisplayName().toLowerCase()
-                    .equals("prygoon") || (messageEvent.getUser()
-                    .getDisplayName()
-                    .toLowerCase()
-                    .equals(messageEvent.getChannel().getName().toLowerCase())))) {
-                sendMessageToChannel(messageEvent.getChannel().getName(), String.format("@%s Нет информации.", messageEvent.getUser().getDisplayName()));
+            if ((nickname.toLowerCase().equals("prygoon") || (nickname.toLowerCase().equals(channel.toLowerCase())))) {
+                sendMessageToChannel(channel, String.format("@%s Нет информации.", nickname));
             } else {
-                String response = String.format(" %s Нет информации.", messageEvent.getUser().getDisplayName());
-                getTwitchClient().getIrcClient().sendPrivateMessage(messageEvent.getUser().getName(), response);
+                String response = String.format(" %s Нет информации.", nickname);
+                getTwitchClient().getIrcClient().sendPrivateMessage(nickname, response);
             }
         }
     }
@@ -71,4 +79,3 @@ public class LastLog extends Command {
         }
     }
 }
-

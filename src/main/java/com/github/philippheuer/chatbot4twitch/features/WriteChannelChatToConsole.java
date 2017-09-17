@@ -11,17 +11,27 @@ public class WriteChannelChatToConsole {
      */
     @EventSubscriber
     public void onChannelMessage(AbstractChannelEvent event) {
-        String user = "";
-        String message = "";
+        String user = null;
+        String message = null;
 
         if (event instanceof ChannelMessageEvent) {
-            user = ((ChannelMessageEvent) event).getUser().getDisplayName();
+            if (((ChannelMessageEvent) event).getUser().getDisplayName() == null) {
+                user = ((ChannelMessageEvent) event).getUser().getName();
+            } else {
+                user = ((ChannelMessageEvent) event).getUser().getDisplayName();
+            }
             message = ((ChannelMessageEvent) event).getMessage();
         } else if (event instanceof ChannelMessageActionEvent) {
-            user = ((ChannelMessageActionEvent) event).getUser().getDisplayName();
-            message = "*" + ((ChannelMessageActionEvent) event).getMessage();
+            if (((ChannelMessageActionEvent) event).getUser().getDisplayName() == null) {
+                user = ((ChannelMessageActionEvent) event).getUser().getName();
+            } else {
+                user = ((ChannelMessageActionEvent) event).getUser().getDisplayName();
+            }
+            message = "[ACTION]" + ((ChannelMessageActionEvent) event).getMessage();
         }
+        if ((message != null) && (user != null)) {
+            System.out.println("Channel [" + event.getChannel().getDisplayName() + "] - UserData[" + user + "] - Message [" + message + "]");
 
-        System.out.println("Channel [" + event.getChannel().getDisplayName() + "] - UserData[" + user + "] - Message [" + message + "]");
+        }
     }
 }

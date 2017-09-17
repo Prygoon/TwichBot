@@ -49,3 +49,4 @@ local.properties
 config/*
 client.log
 /client.log
+/home/prygoon/IdeaProjects/twitch4j-chatbot-master/src/main/resources/hibernate.cfg.xml

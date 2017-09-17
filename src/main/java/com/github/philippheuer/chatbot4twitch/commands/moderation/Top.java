@@ -1,14 +1,21 @@
+
 package com.github.philippheuer.chatbot4twitch.commands.moderation;
 
-import com.github.philippheuer.chatbot4twitch.dbFeatures.ChannelData;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.User;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.service.ChannelLogService;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.service.UserService;
 import me.philippheuer.twitch4j.chat.commands.Command;
 import me.philippheuer.twitch4j.chat.commands.CommandPermission;
 import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
 
+import java.util.List;
+
 public class Top extends Command {
+
     /**
      * Initialize Command
      */
+
     public Top() {
         super();
 
@@ -21,17 +28,37 @@ public class Top extends Command {
         setUsageExample("");
     }
 
+
     /**
      * executeCommand Logic
      */
+
     @Override
     public void executeCommand(ChannelMessageEvent messageEvent) {
         super.executeCommand(messageEvent);
-        ChannelData channelData = new ChannelData(messageEvent);
+
+        String channel = "#" + messageEvent.getChannel().getName();
+        UserService userService = new UserService();
+        ChannelLogService logService = new ChannelLogService();
+
         // Prepare Response
-        String response = channelData.getTopFlooders();
+        List<User> flooders = userService.getTopFiveFlooders(channel);
+        StringBuilder builder = new StringBuilder(String.format("Нафлудили с %s. ", logService.getFirstData(channel)));
+
+        int n = flooders.size();
+        for (int i = 0; i < n; i++) {
+            builder.append(String.format("%s. %s: %s сообщений, %s слов.",
+                    i + 1,
+                    flooders.get(i).getNickname(),
+                    flooders.get(i).getMessageCount(),
+                    flooders.get(i).getWordCount()));
+            builder.append(" ");
+        }
+
+
+        String response = String.valueOf(builder).trim();
         // Send Response
-        sendMessageToChannel(messageEvent.getChannel().getName(), response);
+        sendMessageToChannel(channel.substring(1), response);
     }
 
     @Override
@@ -43,3 +70,4 @@ public class Top extends Command {
         }
     }
 }
+

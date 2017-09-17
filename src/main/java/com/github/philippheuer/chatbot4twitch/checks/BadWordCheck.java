@@ -1,6 +1,11 @@
+
 package com.github.philippheuer.chatbot4twitch.checks;
 
-import com.github.philippheuer.chatbot4twitch.dbFeatures.UserData;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.User;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.service.ChannelLogService;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.service.UserService;
+import me.philippheuer.twitch4j.events.event.AbstractChannelEvent;
+import me.philippheuer.twitch4j.events.event.ChannelMessageActionEvent;
 import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
 
 import static com.github.philippheuer.chatbot4twitch.checks.UserPermissionCheck.isMod;
@@ -22,30 +27,55 @@ public class BadWordCheck {
     private static int getLettersAndNumbersCount(String message) {
         int count = 0;
         for (int i = 0; i < message.length(); i++) {
-            if (String.valueOf(message.charAt(i)).matches("[a-zA-Z0-9А-Яа-я() .,!?\\-+{}*^~\\[\\]`@%:;\"'/\\\\_\\uD83C-\\uDBFF\\uDC00-\\uDFFF]"/*"[ .,!?:^@;()*],[A-Z],[a-z],[А-Я],[а-я],[0-9]/u"*/)) {
+            if (String.valueOf(message.charAt(i)).matches("[a-zA-Z0-9А-Яа-я() .,!?\\-+{}*^~\\[\\]`@%:;\"'/\\\\_\\uD83C-\\uDBFF\\uDC00-\\uDFFF]"
+/*"[ .,!?:^@;()*],[A-Z],[a-z],[А-Я],[а-я],[0-9]/u"*/
+            )) {
                 count++;
             }
         }
         return count;
     }
 
-    public static int copyPasteCount(ChannelMessageEvent event) {
-        UserData userData = new UserData(event);
-        int copypasteCounter = userData.getCopypasteCount();
-        if (isSub(event) || isMod(event)) {
-            return 0;
+    public static int copyPasteCount(AbstractChannelEvent event) {
+        String message = "";
+        String nickname = "";
+        String channel = "";
+
+        if (event instanceof ChannelMessageEvent) {
+            message = ((ChannelMessageEvent) event).getMessage();
+            nickname = ((ChannelMessageEvent) event).getUser().getDisplayName();
+            channel = "#" + event.getChannel().getName();
+
+        } else if (event instanceof ChannelMessageActionEvent) {
+            message = ((ChannelMessageActionEvent) event).getMessage();
+            nickname = ((ChannelMessageActionEvent) event).getUser().getDisplayName();
+            channel = "#" + event.getChannel().getName();
         }
-        if (userData.getPreviousMessage(event) != null) {
-            if ((leviAlg(userData.getPreviousMessage(event), event.getMessage()) < (event.getMessage().length() / 4)) && (event.getMessage().length() > 25)) {
-                userData.incrementCopypasteCount(event);
+
+        if (!message.equals("")) {
+            UserService userService = new UserService();
+            ChannelLogService logService = new ChannelLogService();
+            User user = userService.getUserByNicknameAndChannel(nickname, channel);
+
+            int copypasteCounter = user.getCopypasteCount();
+            String previousMessage = logService.getPreviousMessage(nickname, channel);
+
+
+            if (isSub(event) || isMod(event)) {
+                return 0;
+            }
+
+            if ((previousMessage != null) && ((leviAlg(previousMessage, message) < (message.length() / 4)) && (message.length() > 25))) {
+                user.setCopypasteCount(copypasteCounter++);
                 copypasteCounter++;
             } else {
-                userData.zeroingCopypasteCount(event);
+                user.setCopypasteCount(0);
                 copypasteCounter = 0;
             }
             return copypasteCounter;
+        } else {
+            return 0;
         }
-        return 0;
     }
 
 
@@ -76,3 +106,4 @@ public class BadWordCheck {
         return D2[n];
     }
 }
+

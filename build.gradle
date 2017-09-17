@@ -26,6 +26,8 @@ repositories {
     mavenCentral()
 }
 
+sourceSets.main.output.resourcesDir = sourceSets.main.output.classesDir
+
 // Dependencies
 dependencies {
     // Logging
@@ -33,10 +35,19 @@ dependencies {
     compile("com.jcabi:jcabi-log:0.17.2")
 
     // Twitch4J
+    //compile('com.github.PhilippHeuer:twitch4j:feature~tmi-SNAPSHOT')
     compile('com.github.PhilippHeuer:twitch4j:develop-SNAPSHOT')
 
     //JDBC
     compile group: 'org.postgresql', name: 'postgresql', version: '42.1.1'
+
+    //Hibernate
+    //https://mvnrepository.com/artifact/org.hibernate/hibernate-gradle-plugin
+    compile group: 'org.hibernate', name: 'hibernate-gradle-plugin', version: '5.2.10.Final'
+
+    //Spring transactions
+    // https://mvnrepository.com/artifact/org.springframework/spring-tx
+    compile group: 'org.springframework', name: 'spring-tx', version: '4.3.9.RELEASE'
 
 
 }

@@ -1,7 +1,6 @@
 package com.github.philippheuer.chatbot4twitch.features;
 
 import me.philippheuer.twitch4j.events.EventSubscriber;
-import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
 import me.philippheuer.twitch4j.events.event.FollowEvent;
 
 public class ChannelNotificationOnFollow {

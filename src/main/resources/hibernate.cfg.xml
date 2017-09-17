@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <property name="connection.driver_class">org.postgresql.Driver</property>
+        <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/prygoon</property>
+        <property name="hibernate.connection.username">prygoon</property>
+        <property name="hibernate.connection.password">asdfgh</property>
+        <property name="hibernate.connection.pool_size">10</property>
+        <!--<property name="show_sql">false</property>-->
+        <property name="dialect">org.hibernate.dialect.PostgreSQL95Dialect</property>
+        <property name="transaction.factory_class">
+            org.hibernate.transaction.JDBCTransactionFactory
+        </property>
+        <property name="hibernate.hbm2ddl.auto">update</property>
+        <mapping class="com.github.philippheuer.chatbot4twitch.dbFeatures.entity.User"/>
+        <mapping class="com.github.philippheuer.chatbot4twitch.dbFeatures.entity.ChannelLog"/>
+    </session-factory>
+</hibernate-configuration>
