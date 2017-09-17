@@ -50,3 +50,6 @@ hibernate.cfg.xml
 config/*
 client.log
 
+Будет удалено classes/
+Будет удалено config/
+Будет удалено src/test/
