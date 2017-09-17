@@ -44,9 +44,9 @@ local.properties
 
 # Config files
 *.yaml
+hibernate.cfg.xml
 
 # Logs / Save Files
 config/*
 client.log
-/client.log
-/home/prygoon/IdeaProjects/twitch4j-chatbot-master/src/main/resources/hibernate.cfg.xml
+
