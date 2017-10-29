@@ -23,7 +23,7 @@ public class DBLogger {
             wordCount = ((ChannelMessageEvent) event).getMessage().split(" ").length;
 
         } else if (event instanceof ChannelMessageActionEvent) {
-            message = "*" + ((ChannelMessageActionEvent) event).getMessage();
+            message = "[ACTION] " + ((ChannelMessageActionEvent) event).getMessage();
             userName = ((ChannelMessageActionEvent) event).getUser().getDisplayName();
             wordCount = ((ChannelMessageActionEvent) event).getMessage().split(" ").length;
         }

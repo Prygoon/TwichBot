@@ -3,7 +3,6 @@ package com.github.philippheuer.chatbot4twitch.features;
 import me.philippheuer.twitch4j.events.EventSubscriber;
 import me.philippheuer.twitch4j.events.event.channel.DonationEvent;
 
-
 public class ChannelNotificationOnDonation {
 
     /**
