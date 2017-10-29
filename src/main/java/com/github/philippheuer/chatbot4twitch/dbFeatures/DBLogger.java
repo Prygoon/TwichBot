@@ -1,14 +1,10 @@
 package com.github.philippheuer.chatbot4twitch.dbFeatures;
 
 import me.philippheuer.twitch4j.events.event.AbstractChannelEvent;
-import me.philippheuer.twitch4j.events.event.ChannelMessageActionEvent;
-import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
-import me.philippheuer.twitch4j.model.User;
-
+import me.philippheuer.twitch4j.events.event.irc.ChannelMessageActionEvent;
+import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
 import java.sql.*;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
 
 import static com.github.philippheuer.chatbot4twitch.checks.ChannelStatusCheck.isAlive;
 

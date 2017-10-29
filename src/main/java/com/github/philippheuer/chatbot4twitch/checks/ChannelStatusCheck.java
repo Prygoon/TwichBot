@@ -2,9 +2,7 @@ package com.github.philippheuer.chatbot4twitch.checks;
 
 import me.philippheuer.twitch4j.endpoints.StreamEndpoint;
 import me.philippheuer.twitch4j.events.event.AbstractChannelEvent;
-import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
 import me.philippheuer.twitch4j.model.Stream;
-
 import java.util.Optional;
 
 public class ChannelStatusCheck {

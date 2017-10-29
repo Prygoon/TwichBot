@@ -1,9 +1,9 @@
 package com.github.philippheuer.chatbot4twitch.commands.moderation;
 
 import com.github.philippheuer.chatbot4twitch.dbFeatures.ChannelData;
-import me.philippheuer.twitch4j.chat.commands.Command;
-import me.philippheuer.twitch4j.chat.commands.CommandPermission;
-import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
+import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
+import me.philippheuer.twitch4j.message.commands.Command;
+import me.philippheuer.twitch4j.message.commands.CommandPermission;
 
 public class Top extends Command {
     /**

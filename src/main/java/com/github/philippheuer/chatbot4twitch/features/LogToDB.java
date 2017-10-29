@@ -2,8 +2,8 @@ package com.github.philippheuer.chatbot4twitch.features;
 
 import com.github.philippheuer.chatbot4twitch.dbFeatures.DBLogger;
 import me.philippheuer.twitch4j.events.EventSubscriber;
-import me.philippheuer.twitch4j.events.event.ChannelMessageActionEvent;
-import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
+import me.philippheuer.twitch4j.events.event.irc.ChannelMessageActionEvent;
+import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
 
 public class LogToDB {
 

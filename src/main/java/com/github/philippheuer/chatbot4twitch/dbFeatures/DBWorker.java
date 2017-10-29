@@ -1,9 +1,6 @@
 package com.github.philippheuer.chatbot4twitch.dbFeatures;
 
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class DBWorker {
     private Connection connection;

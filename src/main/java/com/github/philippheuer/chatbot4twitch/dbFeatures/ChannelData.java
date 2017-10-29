@@ -1,7 +1,6 @@
 package com.github.philippheuer.chatbot4twitch.dbFeatures;
 
-import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
-
+import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;

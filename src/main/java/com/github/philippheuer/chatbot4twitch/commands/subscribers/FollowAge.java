@@ -1,11 +1,10 @@
 package com.github.philippheuer.chatbot4twitch.commands.subscribers;
 
-import me.philippheuer.twitch4j.chat.commands.Command;
-import me.philippheuer.twitch4j.chat.commands.CommandPermission;
-import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
+import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
+import me.philippheuer.twitch4j.message.commands.Command;
+import me.philippheuer.twitch4j.message.commands.CommandPermission;
 import me.philippheuer.twitch4j.model.Follow;
 import me.philippheuer.twitch4j.model.User;
-
 import java.text.SimpleDateFormat;
 import java.util.Optional;
 

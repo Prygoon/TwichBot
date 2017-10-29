@@ -1,7 +1,7 @@
 package com.github.philippheuer.chatbot4twitch.features;
 
 import me.philippheuer.twitch4j.events.EventSubscriber;
-import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
+import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
 
 import static com.github.philippheuer.chatbot4twitch.checks.BadWordCheck.*;
 import static com.github.philippheuer.chatbot4twitch.checks.UserPermissionCheck.isMod;

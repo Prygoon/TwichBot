@@ -1,10 +1,9 @@
 package com.github.philippheuer.chatbot4twitch.commands.moderation;
 
 import com.github.philippheuer.chatbot4twitch.dbFeatures.ChannelData;
-import me.philippheuer.twitch4j.chat.commands.Command;
-import me.philippheuer.twitch4j.chat.commands.CommandPermission;
-import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
-
+import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
+import me.philippheuer.twitch4j.message.commands.Command;
+import me.philippheuer.twitch4j.message.commands.CommandPermission;
 import java.util.List;
 
 public class LastLog extends Command {
@@ -44,7 +43,7 @@ public class LastLog extends Command {
                         .equals(messageEvent.getChannel().getName().toLowerCase())))) {
                     sendMessageToChannel(messageEvent.getChannel().getName(), String.format("@%s " + element, messageEvent.getUser().getDisplayName()));
                 } else {
-                    getTwitchClient().getIrcClient().sendPrivateMessage(messageEvent.getUser().getName(), element);
+                    getTwitchClient().getMessageInterface().sendPrivateMessage(messageEvent.getUser().getName(), element);
                 }
             }
         } else {
@@ -57,7 +56,7 @@ public class LastLog extends Command {
                 sendMessageToChannel(messageEvent.getChannel().getName(), String.format("@%s Нет информации.", messageEvent.getUser().getDisplayName()));
             } else {
                 String response = String.format(" %s Нет информации.", messageEvent.getUser().getDisplayName());
-                getTwitchClient().getIrcClient().sendPrivateMessage(messageEvent.getUser().getName(), response);
+                getTwitchClient().getMessageInterface().sendPrivateMessage(messageEvent.getUser().getName(), response);
             }
         }
     }
