@@ -6,9 +6,10 @@ import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.User;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.service.ChannelLogService;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.service.UserService;
 import me.philippheuer.twitch4j.events.EventSubscriber;
-import me.philippheuer.twitch4j.events.event.ChannelMessageActionEvent;
-import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
+import me.philippheuer.twitch4j.events.event.irc.ChannelMessageActionEvent;
+import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
 
+import javax.persistence.NoResultException;
 import java.sql.Timestamp;
 import java.util.Calendar;
 
@@ -22,7 +23,8 @@ public class LogToDB {
         String message = event.getMessage();
 
         ChannelLogService logService = new ChannelLogService();
-
+        UserService userService;
+        User user;
         ChannelLog log = new ChannelLog();
         log.setChannel(channel);
         log.setNickname(nickname);
@@ -30,15 +32,24 @@ public class LogToDB {
         log.setTimestamp(new Timestamp(Calendar.getInstance().getTimeInMillis()));
 
         logService.addLog(log);
+        userService = new UserService();
 
-        if (ChannelStatusCheck.isAlive(event)) {
-            UserService userService = new UserService();
+        try {
+            user = userService.getUserByNicknameAndChannel(nickname, channel);
 
-            User user = userService.getUserByNicknameAndChannel(nickname, channel);
-            user.setMessageCount(user.getMessageCount() + 1);
-            user.setWordCount(user.getWordCount() + message.split(" ").length);
+            if (ChannelStatusCheck.isAlive(event)) {
+
+                user.setMessageCount(user.getMessageCount() + 1);
+                user.setWordCount(user.getWordCount() + message.split(" ").length);
+            }
 
             userService.updateUser(user);
+
+        } catch (NoResultException ex) {
+            user = new User();
+            user.setNickname(nickname);
+            user.setChannel(channel);
+            userService.addUser(user);
         }
     }
 
@@ -49,7 +60,7 @@ public class LogToDB {
         String message = "[ACTION]" + event.getMessage();
 
         ChannelLogService logService = new ChannelLogService();
-
+        User user;
         ChannelLog log = new ChannelLog();
         log.setChannel(channel);
         log.setNickname(nickname);
@@ -57,15 +68,23 @@ public class LogToDB {
         log.setTimestamp(new Timestamp(Calendar.getInstance().getTimeInMillis()));
 
         logService.addLog(log);
+        UserService userService = new UserService();
 
-        if (ChannelStatusCheck.isAlive(event)) {
-            UserService userService = new UserService();
+        try {
+            user = userService.getUserByNicknameAndChannel(nickname, channel);
 
-            User user = userService.getUserByNicknameAndChannel(nickname, channel);
-            user.setMessageCount(user.getMessageCount() + 1);
-            user.setWordCount(user.getWordCount() + message.split(" ").length - 1);
+            if (ChannelStatusCheck.isAlive(event)) {
+
+                user.setMessageCount(user.getMessageCount() + 1);
+                user.setWordCount(user.getWordCount() + message.split(" ").length);
+            }
 
             userService.updateUser(user);
+
+        } catch (NoResultException ex) {
+            user = new User();
+            user.setNickname(event.getUser().getDisplayName());
+            userService.addUser(user);
         }
     }
 

@@ -1,10 +1,9 @@
 package com.github.philippheuer.chatbot4twitch.commands.general;
 
-import me.philippheuer.twitch4j.chat.commands.Command;
-import me.philippheuer.twitch4j.chat.commands.CommandPermission;
-import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
+import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
+import me.philippheuer.twitch4j.message.commands.Command;
+import me.philippheuer.twitch4j.message.commands.CommandPermission;
 
-import java.util.Objects;
 import java.util.Optional;
 
 public class Help extends Command {
@@ -42,19 +41,7 @@ public class Help extends Command {
                 // UserData has Permissions for Command
                 String response = String.format("Команда: %s | Описание: %s", cmd.get().getCommand(), cmd.get().getDescription());
                 sendMessageToChannel(messageEvent.getChannel().getName(), response);
-            } else {
-                // UserData has no permissions for this command
-                return;
             }
-        } else {
-            /*String response;
-            if (cmdName == null) {
-                response = String.format("@%s %s - нет такой команды.", messageEvent.getUser().getDisplayName(), cmdName);
-            } else {
-                response = String.format("@%s Укажите название команды", messageEvent.getUser().getDisplayName());
-            }
-            sendMessageToChannel(messageEvent.getChannel().getName(), response);*/
-            return;
         }
     }
 }

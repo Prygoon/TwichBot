@@ -5,8 +5,10 @@ import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.User;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.service.ChannelLogService;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.service.UserService;
 import me.philippheuer.twitch4j.events.event.AbstractChannelEvent;
-import me.philippheuer.twitch4j.events.event.ChannelMessageActionEvent;
-import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
+import me.philippheuer.twitch4j.events.event.irc.ChannelMessageActionEvent;
+import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
+
+import javax.persistence.NoResultException;
 
 import static com.github.philippheuer.chatbot4twitch.checks.UserPermissionCheck.isMod;
 import static com.github.philippheuer.chatbot4twitch.checks.UserPermissionCheck.isSub;
@@ -28,7 +30,7 @@ public class BadWordCheck {
         int count = 0;
         for (int i = 0; i < message.length(); i++) {
             if (String.valueOf(message.charAt(i)).matches("[a-zA-Z0-9А-Яа-я() .,!?\\-+{}*^~\\[\\]`@%:;\"'/\\\\_\\uD83C-\\uDBFF\\uDC00-\\uDFFF]"
-/*"[ .,!?:^@;()*],[A-Z],[a-z],[А-Я],[а-я],[0-9]/u"*/
+                    /*"[ .,!?:^@;()*],[A-Z],[a-z],[А-Я],[а-я],[0-9]/u"*/
             )) {
                 count++;
             }
@@ -51,29 +53,32 @@ public class BadWordCheck {
             nickname = ((ChannelMessageActionEvent) event).getUser().getDisplayName();
             channel = "#" + event.getChannel().getName();
         }
+        try {
+            if (!message.equals("")) {
+                UserService userService = new UserService();
+                ChannelLogService logService = new ChannelLogService();
 
-        if (!message.equals("")) {
-            UserService userService = new UserService();
-            ChannelLogService logService = new ChannelLogService();
-            User user = userService.getUserByNicknameAndChannel(nickname, channel);
+                User user = userService.getUserByNicknameAndChannel(nickname, channel);
 
-            int copypasteCounter = user.getCopypasteCount();
-            String previousMessage = logService.getPreviousMessage(nickname, channel);
+                int copypasteCounter = user.getCopypasteCount();
+                String previousMessage = logService.getPreviousMessage(nickname, channel);
 
+                if (isSub(event) || isMod(event)) {
+                    return 0;
+                }
 
-            if (isSub(event) || isMod(event)) {
+                if ((previousMessage != null) && ((leviAlg(previousMessage, message) < (message.length() / 4)) && (message.length() > 25))) {
+                    user.setCopypasteCount(copypasteCounter++);
+                    copypasteCounter++;
+                } else {
+                    user.setCopypasteCount(0);
+                    copypasteCounter = 0;
+                }
+                return copypasteCounter;
+            } else {
                 return 0;
             }
-
-            if ((previousMessage != null) && ((leviAlg(previousMessage, message) < (message.length() / 4)) && (message.length() > 25))) {
-                user.setCopypasteCount(copypasteCounter++);
-                copypasteCounter++;
-            } else {
-                user.setCopypasteCount(0);
-                copypasteCounter = 0;
-            }
-            return copypasteCounter;
-        } else {
+        } catch (NoResultException ignored) {
             return 0;
         }
     }

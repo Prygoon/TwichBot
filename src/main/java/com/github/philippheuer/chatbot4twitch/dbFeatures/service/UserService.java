@@ -6,7 +6,9 @@ import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.User;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
+import javax.persistence.NoResultException;
 import java.util.List;
+import java.util.Optional;
 
 
 public class UserService extends SessionUtil implements UserDao {
@@ -32,7 +34,7 @@ public class UserService extends SessionUtil implements UserDao {
     }
 
     @Override
-    public User getUserByNicknameAndChannel(String nickname, String channel) {
+    public User getUserByNicknameAndChannel(String nickname, String channel) throws NoResultException {
         if (!(nickname.equals("") && channel.equals(""))) {
             openTransactionSession();
 

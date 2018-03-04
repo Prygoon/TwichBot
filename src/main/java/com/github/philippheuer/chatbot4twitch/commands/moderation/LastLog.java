@@ -3,13 +3,14 @@ package com.github.philippheuer.chatbot4twitch.commands.moderation;
 
 import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.ChannelLog;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.service.ChannelLogService;
-import me.philippheuer.twitch4j.chat.commands.Command;
-import me.philippheuer.twitch4j.chat.commands.CommandPermission;
-import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
+import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
+import me.philippheuer.twitch4j.message.commands.Command;
+import me.philippheuer.twitch4j.message.commands.CommandPermission;
 
 import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.List;
+import java.util.Stack;
+
+import static com.github.philippheuer.chatbot4twitch.checks.UserPermissionCheck.isOwner;
 
 public class LastLog extends Command {
 
@@ -41,31 +42,48 @@ public class LastLog extends Command {
         // Prepare Response
         String nickname = messageEvent.getUser().getDisplayName();
         String channel = "#" + messageEvent.getChannel().getName();
-        String commandTarget = messageEvent.getMessage().split(" ")[1].toLowerCase();
+        String commandTarget;
+        if (messageEvent.getMessage().split(" ").length > 1) {
+            commandTarget = messageEvent.getMessage().split(" ")[1];
+        } else {
+            commandTarget = messageEvent.getUser().getDisplayName();
+        }
+
         SimpleDateFormat dateFormat = new SimpleDateFormat("[yyyy-MM-dd HH:mm:ss]");
         ChannelLogService logService = new ChannelLogService();
-        List<ChannelLog> lastLog = logService.getLastLog(channel, commandTarget);
-        Collections.reverse(lastLog);
+        Stack<ChannelLog> lastLog = logService.getLastLog(channel, commandTarget);
+        int lastLogSize = lastLog.size();
 
-        if (lastLog.size() != 0) {
-            for (ChannelLog log : lastLog) {
+        if (!lastLog.empty()) {
+            for (int i = 0; i < lastLogSize; i++) {
+                ChannelLog log = lastLog.pop();
                 String date = dateFormat.format(log.getTimestamp());
                 String logNickname = log.getNickname();
                 String logMessage = log.getMessage();
                 String response = date + " " + logNickname + ":" + logMessage;
                 // Send Response
-                if ((nickname.toLowerCase().equals("prygoon") || (nickname.toLowerCase().equals(channel.toLowerCase())))) {
+                if (isOwner(nickname, channel.substring(1))) {
                     sendMessageToChannel(channel.substring(1), String.format("@%s " + response, nickname));
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 } else {
-                    getTwitchClient().getIrcClient().sendPrivateMessage(nickname, response);
+                    sendMessageToChannel(channel, response);
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         } else {
-            if ((nickname.toLowerCase().equals("prygoon") || (nickname.toLowerCase().equals(channel.toLowerCase())))) {
+            if (isOwner(nickname, channel.substring(1))) {
                 sendMessageToChannel(channel, String.format("@%s Нет информации.", nickname));
             } else {
                 String response = String.format(" %s Нет информации.", nickname);
-                getTwitchClient().getIrcClient().sendPrivateMessage(nickname, response);
+                getTwitchClient().getMessageInterface().sendPrivateMessage(nickname, response);
             }
         }
     }

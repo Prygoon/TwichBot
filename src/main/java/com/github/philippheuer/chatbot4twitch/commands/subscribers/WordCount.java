@@ -4,9 +4,12 @@ package com.github.philippheuer.chatbot4twitch.commands.subscribers;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.User;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.service.ChannelLogService;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.service.UserService;
-import me.philippheuer.twitch4j.chat.commands.Command;
-import me.philippheuer.twitch4j.chat.commands.CommandPermission;
-import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
+import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
+import me.philippheuer.twitch4j.message.commands.Command;
+import me.philippheuer.twitch4j.message.commands.CommandPermission;
+
+import javax.persistence.NoResultException;
+
 
 public class WordCount extends Command {
 
@@ -37,18 +40,34 @@ public class WordCount extends Command {
     public void executeCommand(ChannelMessageEvent messageEvent) {
         super.executeCommand(messageEvent);
 
+        int wordCount = 0;
+        int messageCount = 0;
+        String commandTarget;
+        String response;
+
         String nickname = messageEvent.getUser().getDisplayName();
         String channel = "#" + messageEvent.getChannel().getName();
-        String commandTarget = messageEvent.getMessage().split(" ")[1];
         UserService userService = new UserService();
         ChannelLogService logService = new ChannelLogService();
-
-        User user = userService.getUserByNicknameAndChannel(nickname, channel);
         String firstDate = logService.getFirstData(channel);
 
-        String response;
-        int wordCount = user.getWordCount();
-        int messageCount = user.getMessageCount();
+
+        if (messageEvent.getMessage().split(" ").length > 1) {
+            commandTarget = messageEvent.getMessage().split(" ")[1];
+        } else {
+            commandTarget = nickname;
+        }
+
+        try {
+            User user = userService.getUserByNicknameAndChannel(commandTarget, channel);
+
+            wordCount = user.getWordCount();
+            messageCount = user.getMessageCount();
+        } catch (NoResultException ignored) {
+
+        }
+
+
         // Prepare Response
         if ((nickname != null) && (wordCount != 0) && (messageCount != 0)) {
             response = String.format("@%s , %s сказал(а) уже %s слов в %s сообщениях с %s.",

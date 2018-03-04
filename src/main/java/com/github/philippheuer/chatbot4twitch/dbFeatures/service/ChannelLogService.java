@@ -8,7 +8,10 @@ import org.hibernate.query.Query;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Stack;
 
 public class ChannelLogService extends SessionUtil implements ChannelLogDao {
 
@@ -42,24 +45,26 @@ public class ChannelLogService extends SessionUtil implements ChannelLogDao {
     }
 
     @Override
-    public List<ChannelLog> getLastLog(String channel, String nickname) {
+    public Stack<ChannelLog> getLastLog(String channel, String nickname) {
+        Stack<ChannelLog> lastLogStack = new Stack<>();
+
         openTransactionSession();
 
         final int lastlogStringsQuantity = 3;
         String sql = "from ChannelLog log " +
                 "where log.channel like :channel " +
                 "and lower(log.nickname) like :nickname " +
-                "order by log.id desc";
+                "order by log.timestamp desc";
 
         Session session = getSession();
         Query query = session.createQuery(sql);
         query.setParameter("channel", channel);
         query.setParameter("nickname", nickname.toLowerCase());
-        List<ChannelLog> lastLog = query.setMaxResults(lastlogStringsQuantity).list();
+        lastLogStack.addAll(query.setMaxResults(lastlogStringsQuantity).list());
 
         closeTransactionSession();
 
-        return lastLog;
+        return lastLogStack;
     }
 
     @Override

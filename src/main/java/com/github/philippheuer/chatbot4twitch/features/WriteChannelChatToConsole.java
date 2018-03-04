@@ -2,8 +2,8 @@ package com.github.philippheuer.chatbot4twitch.features;
 
 import me.philippheuer.twitch4j.events.EventSubscriber;
 import me.philippheuer.twitch4j.events.event.AbstractChannelEvent;
-import me.philippheuer.twitch4j.events.event.ChannelMessageActionEvent;
-import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
+import me.philippheuer.twitch4j.events.event.irc.ChannelMessageActionEvent;
+import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
 
 public class WriteChannelChatToConsole {
     /**
@@ -31,7 +31,6 @@ public class WriteChannelChatToConsole {
         }
         if ((message != null) && (user != null)) {
             System.out.println("Channel [" + event.getChannel().getDisplayName() + "] - UserData[" + user + "] - Message [" + message + "]");
-
         }
     }
 }

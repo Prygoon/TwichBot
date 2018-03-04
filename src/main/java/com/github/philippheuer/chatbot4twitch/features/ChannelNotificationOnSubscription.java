@@ -2,7 +2,7 @@ package com.github.philippheuer.chatbot4twitch.features;
 
 import me.philippheuer.twitch4j.enums.SubPlan;
 import me.philippheuer.twitch4j.events.EventSubscriber;
-import me.philippheuer.twitch4j.events.event.SubscriptionEvent;
+import me.philippheuer.twitch4j.events.event.channel.SubscriptionEvent;
 
 public class ChannelNotificationOnSubscription {
 
@@ -12,15 +12,14 @@ public class ChannelNotificationOnSubscription {
     @EventSubscriber
     public void onSubscription(SubscriptionEvent event) {
         String message;
-        SubPlan subPlan = null;
-        int streak = event.getSubscription().getStreak().get();
+        SubPlan subPlan;
+        int streak = event.getSubscription().getStreak();
         int streakEnds = streak;
         String[] months = {"месяц", "месяца", "месяцев"};
         String plan = "";
         String month;
-        if (event.getSubscription().getSubPlan().isPresent()) {
-            subPlan = event.getSubscription().getSubPlan().get();
-        }
+        subPlan = event.getSubscription().getSubPlan();
+
         assert subPlan != null;
         switch (subPlan) {
             case PRIME: {
@@ -46,7 +45,7 @@ public class ChannelNotificationOnSubscription {
         if (streakEnds >= 11 && streakEnds <= 19) {
             month = months[2];
         } else {
-                streakEnds %= 10;
+            streakEnds %= 10;
             switch (streakEnds) {
                 case 1: {
                     month = months[0];
@@ -64,7 +63,7 @@ public class ChannelNotificationOnSubscription {
         }
 
         // Resubscription
-        if (event.getSubscription().getStreak().isPresent() && streak > 1) {
+        if (streak > 1) {
             message = String.format("Поздравляю, @%s , ты продлил(а) подписку на %s за %s и твой стаж подписки уже %s %s!", event.getUser().getDisplayName(), event.getChannel().getDisplayName(), plan, streak, month);
         } else {
             // New Subscription
@@ -73,7 +72,7 @@ public class ChannelNotificationOnSubscription {
         }
 
         // Send Message
-        event.getClient().getIrcClient().sendMessage(event.getChannel().getName(), message);
+        event.getClient().getMessageInterface().sendMessage(event.getChannel().getName(), message);
     }
 
 }
