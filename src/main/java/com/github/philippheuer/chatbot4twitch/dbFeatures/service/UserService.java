@@ -3,6 +3,7 @@ package com.github.philippheuer.chatbot4twitch.dbFeatures.service;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.SessionUtil;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.dao.UserDao;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.User;
+import org.hibernate.NonUniqueResultException;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
@@ -34,16 +35,33 @@ public class UserService extends SessionUtil implements UserDao {
     }
 
     @Override
-    public User getUserByNicknameAndChannel(String nickname, String channel) throws NoResultException {
+    public void deleteDuplicateUser(User user) {
+        String hql = "delete from User user " +
+                "where user.messageCount < :messageCount " +
+                "and user.twitchId = :twitchId";
+
+        openTransactionSession();
+
+        Session session = getSession();
+        Query query = session.createQuery(hql);
+        query.setParameter("messageCount", 2);
+        query.setParameter("twitchId", user.getTwitchId());
+        query.executeUpdate();
+
+        closeTransactionSession();
+    }
+
+    @Override
+    public User getUserByNicknameAndChannel(String nickname, String channel) throws NoResultException, NonUniqueResultException {
         if (!(nickname.equals("") && channel.equals(""))) {
-            String sql = "from User user " +
+            String hql = "from User user " +
                     "where user.displayNickname like :displayNickname " +
                     "and user.channel like :channel";
 
             openSession();
 
             Session session = getSession();
-            Query query = session.createQuery(sql);
+            Query query = session.createQuery(hql);
             query.setParameter("displayNickname", nickname);
             query.setParameter("channel", channel);
             User user = (User) query.getSingleResult();
@@ -57,7 +75,7 @@ public class UserService extends SessionUtil implements UserDao {
     }
 
     @Override
-    public User getUserByIdAndChannel(Long userId, String channel) {
+    public User getUserByIdAndChannel(Long userId, String channel) throws NoResultException, NonUniqueResultException {
         if (!channel.equals("")) {
             String hql = "from User user " +
                     "where user.twitchId = :twitchId " +
@@ -122,6 +140,22 @@ public class UserService extends SessionUtil implements UserDao {
         Session session = getSession();
         Query query = session.createQuery(hql);
         query.setParameter("nickname", "nothingnothing");
+
+        return query.list();
+    }
+
+    @Override
+    public List<User> getDuplicateUsers(Long twitchId, String channel) {
+        String hql = "from User user " +
+                "where user.twitchId = :twitchId " +
+                "and user.channel = :channel";
+
+        openSession();
+
+        Session session = getSession();
+        Query query = session.createQuery(hql);
+        query.setParameter("twitchId", twitchId);
+        query.setParameter("channel", channel);
 
         return query.list();
     }

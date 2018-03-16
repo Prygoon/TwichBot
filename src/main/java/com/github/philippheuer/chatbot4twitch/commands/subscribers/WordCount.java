@@ -55,7 +55,7 @@ public class WordCount extends Command {
 
         if (messageEvent.getMessage().split(" ").length > 1) {
             commandTarget = messageEvent.getMessage().split(" ")[1];
-            twitchId = getTwitchClient().getUserEndpoint().getUserIdByUserName(commandTarget).orElse(0L);
+            twitchId = getTwitchClient().getUserEndpoint().getUserIdByUserName(commandTarget).get();
         } else {
             commandTarget = nickname;
             twitchId = messageEvent.getUser().getId();

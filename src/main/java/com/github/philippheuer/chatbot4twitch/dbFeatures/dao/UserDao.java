@@ -9,6 +9,8 @@ public interface UserDao {
 
     void updateUser(User user);
 
+    void deleteDuplicateUser(User user);
+
     User getUserByNicknameAndChannel(String nickname, String channel);
 
     User getUserByIdAndChannel (Long userId, String channel);
@@ -19,4 +21,5 @@ public interface UserDao {
 
     List<User> getAllUsersWithoutRealNicknames();
 
+    List<User> getDuplicateUsers(Long twitchId, String channel);
 }

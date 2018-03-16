@@ -9,10 +9,12 @@ import me.philippheuer.twitch4j.events.EventSubscriber;
 import me.philippheuer.twitch4j.events.event.AbstractChannelEvent;
 import me.philippheuer.twitch4j.events.event.irc.ChannelMessageActionEvent;
 import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
+import org.hibernate.NonUniqueResultException;
 
 import javax.persistence.NoResultException;
 import java.sql.Timestamp;
-import java.util.Calendar;
+import java.util.*;
+import java.util.stream.Stream;
 
 public class DatabaseMessageLogger {
 
@@ -101,6 +103,16 @@ public class DatabaseMessageLogger {
             user.setTwitchId(twitchId);
 
             userService.addUser(user);
+
+        } catch (NonUniqueResultException ex) {
+            List<User> duplicateUsers = userService.getDuplicateUsers(twitchId, channel);
+            Optional<User> optionalWrongUser = duplicateUsers.stream().min(Comparator.comparingInt(User::getMessageCount));
+
+            if (optionalWrongUser.isPresent()) {
+                User wrongUser = optionalWrongUser.get();
+                userService.deleteDuplicateUser(wrongUser);
+                System.out.println("DELETED");
+            }
         }
     }
 
