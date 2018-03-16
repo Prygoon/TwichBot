@@ -11,6 +11,12 @@ public interface UserDao {
 
     User getUserByNicknameAndChannel(String nickname, String channel);
 
+    User getUserByIdAndChannel (Long userId, String channel);
+
     List<User> getTopFiveFlooders (String channel);
+
+    List<User> getAllUsersWithoutTwitchId();
+
+    List<User> getAllUsersWithoutRealNicknames();
 
 }

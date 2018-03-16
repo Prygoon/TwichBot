@@ -47,6 +47,7 @@ public class WordCount extends Command {
 
         String nickname = messageEvent.getUser().getDisplayName();
         String channel = "#" + messageEvent.getChannel().getName();
+        Long twitchId;
         UserService userService = new UserService();
         ChannelLogService logService = new ChannelLogService();
         String firstDate = logService.getFirstData(channel);
@@ -54,12 +55,14 @@ public class WordCount extends Command {
 
         if (messageEvent.getMessage().split(" ").length > 1) {
             commandTarget = messageEvent.getMessage().split(" ")[1];
+            twitchId = getTwitchClient().getUserEndpoint().getUserIdByUserName(commandTarget).orElse(0L);
         } else {
             commandTarget = nickname;
+            twitchId = messageEvent.getUser().getId();
         }
 
         try {
-            User user = userService.getUserByNicknameAndChannel(commandTarget, channel);
+            User user = userService.getUserByIdAndChannel(twitchId, channel);
 
             wordCount = user.getWordCount();
             messageCount = user.getMessageCount();

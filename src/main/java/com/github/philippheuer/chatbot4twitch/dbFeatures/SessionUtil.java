@@ -16,21 +16,20 @@ public class SessionUtil {
         return transaction;
     }
 
-    public Session openSession() {
-        return HibernateUtil.getSessionFactory().openSession();
+    protected void openSession() {
+        session = HibernateUtil.getSessionFactory().openSession();
     }
 
-    public Session openTransactionSession() {
-        session = openSession();
+    protected void openTransactionSession() {
+        openSession();
         transaction = session.beginTransaction();
-        return session;
     }
 
-    public void closeSession() {
+    protected void closeSession() {
         session.close();
     }
 
-    public void closeTransactionSession() {
+    protected void closeTransactionSession() {
         transaction.commit();
         closeSession();
     }

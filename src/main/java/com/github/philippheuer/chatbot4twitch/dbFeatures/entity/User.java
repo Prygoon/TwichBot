@@ -12,6 +12,9 @@ public class User implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(name = "display_nickname")
+    private String displayNickname;
+
     @Column(name = "nickname")
     private String nickname;
 
@@ -30,6 +33,9 @@ public class User implements Serializable{
     @Column(name = "ban_count")
     private int banCount;
 
+    @Column(name = "twitch_id")
+    private Long twitchId ;
+
     public User() {
     }
 
@@ -39,6 +45,14 @@ public class User implements Serializable{
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getDisplayNickname() {
+        return displayNickname;
+    }
+
+    public void setDisplayNickname(String displayNickname) {
+        this.displayNickname = displayNickname;
     }
 
     public String getNickname() {
@@ -87,5 +101,13 @@ public class User implements Serializable{
 
     public void setBanCount(int banCount) {
         this.banCount = banCount;
+    }
+
+    public long getTwitchId() {
+        return twitchId;
+    }
+
+    public void setTwitchId(long twitchId) {
+        this.twitchId = twitchId;
     }
 }

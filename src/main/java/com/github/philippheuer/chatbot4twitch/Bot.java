@@ -12,7 +12,6 @@ import com.github.philippheuer.chatbot4twitch.commands.subscribers.WordCount;
 import com.github.philippheuer.chatbot4twitch.features.*;
 import me.philippheuer.twitch4j.TwitchClient;
 import me.philippheuer.twitch4j.TwitchClientBuilder;
-import me.philippheuer.twitch4j.auth.model.OAuthCredential;
 import me.philippheuer.twitch4j.endpoints.ChannelEndpoint;
 
 import java.io.File;
@@ -42,6 +41,7 @@ public class Bot {
                 .withClientId(getConfiguration().getApi().get("twitch_client_id"))
                 .withClientSecret(getConfiguration().getApi().get("twitch_client_secret"))
                 .withCredential(getConfiguration().getCredentials().get("irc"))
+                //.withCredentialRefreshToken("refresh")
                 .withAutoSaveConfiguration(true)
                 .withConfigurationDirectory(new File("config"))
                 .build();
@@ -56,28 +56,30 @@ public class Bot {
      */
     public void registerCommands() {
         // General
-        twitchClient.getCommandHandler().registerCommand(Commands.class);
+        //twitchClient.getCommandHandler().registerCommand(Commands.class);
         //twitchClient.getCommandHandler().registerCommand(Help.class);
         //Subscribers
-        twitchClient.getCommandHandler().registerCommand(FollowAge.class);
-        twitchClient.getCommandHandler().registerCommand(WordCount.class);
+        //twitchClient.getCommandHandler().registerCommand(FollowAge.class);
+        //twitchClient.getCommandHandler().registerCommand(WordCount.class);
         // Moderation
-        twitchClient.getCommandHandler().registerCommand(Top.class);
-        twitchClient.getCommandHandler().registerCommand(CommandAdd.class);
-        twitchClient.getCommandHandler().registerCommand(CommandRemove.class);
-        twitchClient.getCommandHandler().registerCommand(LastLog.class);
+        //twitchClient.getCommandHandler().registerCommand(Top.class);
+        //twitchClient.getCommandHandler().registerCommand(CommandAdd.class);
+        //twitchClient.getCommandHandler().registerCommand(CommandRemove.class);
+        //twitchClient.getCommandHandler().registerCommand(LastLog.class);
+        //twitchClient.getCommandHandler().registerCommand(new TwitchIdCollector());
+        //twitchClient.getCommandHandler().registerCommand(new NickNameCollector());
     }
 
     /**
      * Method to register all features
      */
     public void registerFeatures() {
-        twitchClient.getDispatcher().registerListener(new WordFilter());
+        //twitchClient.getDispatcher().registerListener(new WordFilter());
         //twitchClient.getDispatcher().registerListener(new ChannelNotificationOnFollow());
-        twitchClient.getDispatcher().registerListener(new ChannelNotificationOnSubscription());
+        //twitchClient.getDispatcher().registerListener(new ChannelNotificationOnSubscription());
         //twitchClient.getDispatcher().registerListener(new ChannelNotificationOnDonation());
         twitchClient.getDispatcher().registerListener(new WriteChannelChatToConsole());
-        twitchClient.getDispatcher().registerListener(new LogToDB());
+        twitchClient.getDispatcher().registerListener(new DatabaseMessageLogger());
     }
 
     /**

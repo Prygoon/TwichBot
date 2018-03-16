@@ -4,14 +4,16 @@ import me.philippheuer.twitch4j.events.EventSubscriber;
 import me.philippheuer.twitch4j.events.event.AbstractChannelEvent;
 import me.philippheuer.twitch4j.events.event.irc.ChannelMessageActionEvent;
 import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
+import me.philippheuer.twitch4j.events.event.irc.ChannelNoticeEvent;
+import me.philippheuer.twitch4j.events.event.irc.IRCMessageEvent;
 
 public class WriteChannelChatToConsole {
     /**
      * Subscribe to the ChannelMessage Event and write the output to the console
      */
     @EventSubscriber
-    public void onChannelMessage(AbstractChannelEvent event) {
-        String user = null;
+    public void onChannelMessage(IRCMessageEvent event) {
+        /*String user = null;
         String message = null;
 
         if (event instanceof ChannelMessageEvent) {
@@ -26,11 +28,11 @@ public class WriteChannelChatToConsole {
                 user = ((ChannelMessageActionEvent) event).getUser().getName();
             } else {
                 user = ((ChannelMessageActionEvent) event).getUser().getDisplayName();
-            }
+
             message = "[ACTION]" + ((ChannelMessageActionEvent) event).getMessage();
         }
-        if ((message != null) && (user != null)) {
-            System.out.println("Channel [" + event.getChannel().getDisplayName() + "] - UserData[" + user + "] - Message [" + message + "]");
-        }
+        if ((message != null) && (user != null)) {*/
+            System.out.println("Channel [" + event.getChannelName().orElse("") + "] Type [" + event.getCommandType() + "] - Message [" + event.getRawMessage() + "]");
+        //}
     }
 }

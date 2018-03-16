@@ -45,6 +45,7 @@ public class FollowAge extends Command {
                 // Not Following
                 .orElseGet(() -> String.format("%s еще пока не фолловер", commandTarget.getDisplayName()));
         sendMessageToChannel(messageEvent.getChannel().getName(), response);
+
     }
 
 }

@@ -49,7 +49,7 @@ public class Top extends Command {
         for (int i = 0; i < n; i++) {
             builder.append(String.format("%s. %s: %s сообщений, %s слов.",
                     i + 1,
-                    flooders.get(i).getNickname(),
+                    flooders.get(i).getDisplayNickname(),
                     flooders.get(i).getMessageCount(),
                     flooders.get(i).getWordCount()));
             builder.append(" ");

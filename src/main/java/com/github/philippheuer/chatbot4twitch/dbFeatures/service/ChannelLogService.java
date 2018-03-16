@@ -17,29 +17,29 @@ public class ChannelLogService extends SessionUtil implements ChannelLogDao {
 
     @Override
     public void addLog(ChannelLog log) {
-        openTransactionSession();
+        openSession();
 
         Session session = getSession();
         session.save(log);
 
-        closeTransactionSession();
+        closeSession();
     }
 
     @Override
     public String getFirstData(String channel) {
-        openTransactionSession();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
         String sql = "select log.timestamp from ChannelLog log " +
                 "where log.channel like :channel " +
                 "order by log.id";
+        openSession();
 
         Session session = getSession();
         Query query = session.createQuery(sql);
         query.setParameter("channel", channel);
         String firstDate = dateFormat.format((Timestamp) query.setMaxResults(1).getSingleResult());
 
-        closeTransactionSession();
+        closeSession();
 
         return firstDate;
     }
@@ -48,13 +48,13 @@ public class ChannelLogService extends SessionUtil implements ChannelLogDao {
     public Stack<ChannelLog> getLastLog(String channel, String nickname) {
         Stack<ChannelLog> lastLogStack = new Stack<>();
 
-        openTransactionSession();
 
         final int lastlogStringsQuantity = 3;
         String sql = "from ChannelLog log " +
                 "where log.channel like :channel " +
                 "and lower(log.nickname) like :nickname " +
                 "order by log.timestamp desc";
+        openSession();
 
         Session session = getSession();
         Query query = session.createQuery(sql);
@@ -62,27 +62,28 @@ public class ChannelLogService extends SessionUtil implements ChannelLogDao {
         query.setParameter("nickname", nickname.toLowerCase());
         lastLogStack.addAll(query.setMaxResults(lastlogStringsQuantity).list());
 
-        closeTransactionSession();
+        closeSession();
 
         return lastLogStack;
     }
 
     @Override
     public String getPreviousMessage(String nickname, String channel) {
-        openTransactionSession();
+
 
         String sql = "select log.message from ChannelLog log " +
                 "where log.channel like :channel " +
                 "and lower(log.nickname) like :nickname " +
                 "order by log.id desc";
 
+        openSession();
         Session session = getSession();
         Query query = session.createQuery(sql);
         query.setParameter("channel", channel);
         query.setParameter("nickname", nickname.toLowerCase());
         String previousMessage = (String) query.setFirstResult(1).setMaxResults(1).getSingleResult();
 
-        closeTransactionSession();
+        closeSession();
 
         return previousMessage;
     }
