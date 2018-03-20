@@ -3,10 +3,7 @@ package com.github.philippheuer.chatbot4twitch;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.philippheuer.chatbot4twitch.commands.general.Commands;
-import com.github.philippheuer.chatbot4twitch.commands.moderation.CommandAdd;
-import com.github.philippheuer.chatbot4twitch.commands.moderation.CommandRemove;
-import com.github.philippheuer.chatbot4twitch.commands.moderation.LastLog;
-import com.github.philippheuer.chatbot4twitch.commands.moderation.Top;
+import com.github.philippheuer.chatbot4twitch.commands.moderation.*;
 import com.github.philippheuer.chatbot4twitch.commands.general.FollowAge;
 import com.github.philippheuer.chatbot4twitch.commands.subscribers.WordCount;
 import com.github.philippheuer.chatbot4twitch.features.*;
@@ -66,15 +63,14 @@ public class Bot {
         //twitchClient.getCommandHandler().registerCommand(CommandAdd.class);
         //twitchClient.getCommandHandler().registerCommand(CommandRemove.class);
         //twitchClient.getCommandHandler().registerCommand(LastLog.class);
-        //twitchClient.getCommandHandler().registerCommand(new TwitchIdCollector());
-        //twitchClient.getCommandHandler().registerCommand(new NickNameCollector());
+        twitchClient.getCommandHandler().registerCommand(new TwitchIdCollector());
+        twitchClient.getCommandHandler().registerCommand(new NickNameCollector());
     }
 
     /**
      * Method to register all features
      */
     public void registerFeatures() {
-        //twitchClient.getDispatcher().registerListener(new WordFilter());
         //twitchClient.getDispatcher().registerListener(new ChannelNotificationOnFollow());
         //twitchClient.getDispatcher().registerListener(new ChannelNotificationOnSubscription());
         //twitchClient.getDispatcher().registerListener(new ChannelNotificationOnDonation());

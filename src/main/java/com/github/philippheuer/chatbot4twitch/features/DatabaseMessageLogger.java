@@ -14,7 +14,8 @@ import org.hibernate.NonUniqueResultException;
 import javax.persistence.NoResultException;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Stream;
+
+import static com.github.philippheuer.chatbot4twitch.checks.BadWordCheck.*;
 
 public class DatabaseMessageLogger {
 
@@ -42,6 +43,8 @@ public class DatabaseMessageLogger {
 
         logService.addLog(log);
 
+        responseToBadMessage(event, nickname, message);
+
         increaseWordAndMessageCounts(event);
     }
 
@@ -61,6 +64,8 @@ public class DatabaseMessageLogger {
         log.setTimestamp(new Timestamp(Calendar.getInstance().getTimeInMillis()));
 
         logService.addLog(log);
+
+        responseToBadMessage(event, nickname, message);
 
         increaseWordAndMessageCounts(event);
     }
@@ -141,5 +146,6 @@ public class DatabaseMessageLogger {
 
         return "";
     }
+
 }
 

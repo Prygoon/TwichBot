@@ -1,4 +1,4 @@
-package com.github.philippheuer.chatbot4twitch.features;
+package com.github.philippheuer.chatbot4twitch.commands.moderation;
 
 import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.User;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.service.UserService;
@@ -8,13 +8,14 @@ import me.philippheuer.twitch4j.message.commands.CommandPermission;
 
 import java.util.List;
 
-public class TwitchIdCollector extends Command {
+public class NickNameCollector extends Command {
 
-    public TwitchIdCollector() {
+
+    public NickNameCollector() {
         super();
 
         // Command Configuration
-        setCommand("collect");
+        setCommand("collectnicks");
         setCommandAliases(new String[]{});
         setCategory("moderation");
         setDescription(" ");
@@ -29,7 +30,7 @@ public class TwitchIdCollector extends Command {
 
         if ((messageEvent.getUser().getName().equalsIgnoreCase("Prygoon")) && messageEvent.getChannel().getName().equalsIgnoreCase("dekeva")) {
             UserService userService = new UserService();
-            List<User> allUsersWithoutTwitchId = userService.getAllUsersWithoutTwitchId();
+            List<User> allUsersWithoutTwitchId = userService.getAllUsersWithoutRealNicknames();
 
 
             for (User anAllUsersWithoutTwitchId : allUsersWithoutTwitchId) {
@@ -37,10 +38,10 @@ public class TwitchIdCollector extends Command {
                     boolean nicknameFromTwitchIsPresent = getTwitchClient().getUserEndpoint().getUserByUserName(anAllUsersWithoutTwitchId.getDisplayNickname()).isPresent();
                     if (nicknameFromTwitchIsPresent) {
 
-                        //String nickname = getTwitchClient().getUserEndpoint().getUserByUserName(anAllUsersWithoutTwitchId.getDisplayNickname()).get().getName();
+                        String nickname = getTwitchClient().getUserEndpoint().getUserByUserName(anAllUsersWithoutTwitchId.getDisplayNickname()).get().getName();
+                        //Long twitchId = getTwitchClient().getUserEndpoint().getUserIdByUserName(anAllUsersWithoutTwitchId.getDisplayNickname()).orElse(0L);
 
-                        Long twitchId = getTwitchClient().getUserEndpoint().getUserIdByUserName(anAllUsersWithoutTwitchId.getDisplayNickname()).orElse(0L);
-                        anAllUsersWithoutTwitchId.setTwitchId(twitchId);
+                        anAllUsersWithoutTwitchId.setNickname(nickname.toLowerCase());
                         userService.updateUser(anAllUsersWithoutTwitchId);
                     }
                     /*try {
@@ -54,3 +55,5 @@ public class TwitchIdCollector extends Command {
         }
     }
 }
+
+
