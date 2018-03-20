@@ -19,23 +19,22 @@ import static com.github.philippheuer.chatbot4twitch.checks.BadWordCheck.*;
 
 public class DatabaseMessageLogger {
 
-    private ChannelLogService logService;
+    /*private ChannelLogService logService;
     private String displayNickname;
     private String nickname;
     private String channel;
     private String message;
-    private ChannelLog log;
+    private ChannelLog log;*/
 
     @EventSubscriber
     public void onChannelMessage(ChannelMessageEvent event) {
-        displayNickname = event.getUser().getDisplayName();
-        nickname = event.getUser().getName();
-        channel = "#" + event.getChannel().getName();
-        message = event.getMessage();
+        String displayNickname = event.getUser().getDisplayName();
+        String channel = "#" + event.getChannel().getName();
+        String message = event.getMessage();
 
-        logService = new ChannelLogService();
+        ChannelLogService logService = new ChannelLogService();
 
-        log = new ChannelLog();
+        ChannelLog log = new ChannelLog();
         log.setChannel(channel);
         log.setNickname(displayNickname);
         log.setMessage(message);
@@ -43,21 +42,20 @@ public class DatabaseMessageLogger {
 
         logService.addLog(log);
 
-        responseToBadMessage(event, nickname, message);
+        //responseToBadMessage(event, nickname, message);
 
         increaseWordAndMessageCounts(event);
     }
 
     @EventSubscriber
     public void onChannelMessageAction(ChannelMessageActionEvent event) {
-        displayNickname = event.getUser().getDisplayName();
-        nickname = event.getUser().getName();
-        channel = "#" + event.getChannel().getName();
-        message = "[ACTION]" + event.getMessage();
+        String displayNickname = event.getUser().getDisplayName();
+        String channel = "#" + event.getChannel().getName();
+        String message = "[ACTION]" + event.getMessage();
 
-        logService = new ChannelLogService();
+        ChannelLogService logService = new ChannelLogService();
 
-        log = new ChannelLog();
+        ChannelLog log = new ChannelLog();
         log.setChannel(channel);
         log.setNickname(displayNickname);
         log.setMessage(message);
@@ -65,58 +63,74 @@ public class DatabaseMessageLogger {
 
         logService.addLog(log);
 
-        responseToBadMessage(event, nickname, message);
+        //responseToBadMessage(event, nickname, message);
 
         increaseWordAndMessageCounts(event);
     }
 
     private void increaseWordAndMessageCounts(AbstractChannelEvent event) {
-
+        String message = "";
+        String channel = "#" + event.getChannel().getName();
+        String nickname = "";
+        String displayNickname = "";
         User user;
         UserService userService = new UserService();
         Long twitchId = getTwitchIdFromEvent(event);
 
-        try {
-            user = userService.getUserByIdAndChannel(twitchId, channel);
+        if (event instanceof ChannelMessageEvent) {
+            message = ((ChannelMessageEvent) event).getMessage();
+            nickname = ((ChannelMessageEvent) event).getUser().getName();
+            displayNickname = ((ChannelMessageEvent) event).getUser().getDisplayName();
 
-            if (ChannelStatusCheck.isAlive(event)) {
+        } else if (event instanceof ChannelMessageActionEvent) {
+            message = ((ChannelMessageActionEvent) event).getMessage();
+            nickname = ((ChannelMessageActionEvent) event).getUser().getName();
+            displayNickname = ((ChannelMessageActionEvent) event).getUser().getDisplayName();
+        }
 
-                user.setMessageCount(user.getMessageCount() + 1);
-                user.setWordCount(user.getWordCount() + message.split(" ").length);
+        if (!(message.equals("") && nickname.equals("") && displayNickname.equals(""))) {
+            try {
+                user = userService.getUserByIdAndChannel(twitchId, channel);
 
-            }
+                if (ChannelStatusCheck.isAlive(event)) {
 
-            if (user.getTwitchId() == 0) {
-                user.setTwitchId(twitchId);
-            }
+                    user.setMessageCount(user.getMessageCount() + 1);
+                    user.setWordCount(user.getWordCount() + message.split(" ").length);
 
-            if (user.getNickname().equals("nothingnothing")) {
-                user.setNickname(nickname);
-            }
+                }
 
-            if (!user.getDisplayNickname().equals(getDisplayNicknameFromEvent(event))) {
+                if (user.getTwitchId() == 0) {
+                    user.setTwitchId(twitchId);
+                }
+
+                if (user.getNickname().equals("nothingnothing")) {
+                    user.setNickname(nickname);
+                }
+
+                if (!user.getDisplayNickname().equals(getDisplayNicknameFromEvent(event))) {
+                    user.setDisplayNickname(displayNickname);
+                }
+
+                userService.updateUser(user);
+
+            } catch (NoResultException ex) {
+                user = new User();
                 user.setDisplayNickname(displayNickname);
-            }
+                user.setNickname(nickname);
+                user.setChannel(channel);
+                user.setTwitchId(twitchId);
 
-            userService.updateUser(user);
+                userService.addUser(user);
 
-        } catch (NoResultException ex) {
-            user = new User();
-            user.setDisplayNickname(displayNickname);
-            user.setNickname(nickname);
-            user.setChannel(channel);
-            user.setTwitchId(twitchId);
+            } catch (NonUniqueResultException ex) {
+                List<User> duplicateUsers = userService.getDuplicateUsers(twitchId, channel);
+                Optional<User> optionalWrongUser = duplicateUsers.stream().min(Comparator.comparingInt(User::getMessageCount));
 
-            userService.addUser(user);
-
-        } catch (NonUniqueResultException ex) {
-            List<User> duplicateUsers = userService.getDuplicateUsers(twitchId, channel);
-            Optional<User> optionalWrongUser = duplicateUsers.stream().min(Comparator.comparingInt(User::getMessageCount));
-
-            if (optionalWrongUser.isPresent()) {
-                User wrongUser = optionalWrongUser.get();
-                userService.deleteDuplicateUser(wrongUser);
-                System.out.println("DELETED");
+                if (optionalWrongUser.isPresent()) {
+                    User wrongUser = optionalWrongUser.get();
+                    userService.deleteDuplicateUser(wrongUser);
+                    System.out.println("DELETED");
+                }
             }
         }
     }

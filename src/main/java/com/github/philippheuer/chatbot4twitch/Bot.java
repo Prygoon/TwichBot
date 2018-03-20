@@ -57,7 +57,7 @@ public class Bot {
         //twitchClient.getCommandHandler().registerCommand(Help.class);
         //Subscribers
         //twitchClient.getCommandHandler().registerCommand(FollowAge.class);
-        //twitchClient.getCommandHandler().registerCommand(WordCount.class);
+        twitchClient.getCommandHandler().registerCommand(WordCount.class);
         // Moderation
         //twitchClient.getCommandHandler().registerCommand(Top.class);
         //twitchClient.getCommandHandler().registerCommand(CommandAdd.class);
@@ -71,6 +71,7 @@ public class Bot {
      * Method to register all features
      */
     public void registerFeatures() {
+        twitchClient.getDispatcher().registerListener(new WordFilter());
         //twitchClient.getDispatcher().registerListener(new ChannelNotificationOnFollow());
         //twitchClient.getDispatcher().registerListener(new ChannelNotificationOnSubscription());
         //twitchClient.getDispatcher().registerListener(new ChannelNotificationOnDonation());

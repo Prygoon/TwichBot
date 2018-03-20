@@ -4,25 +4,25 @@ package com.github.philippheuer.chatbot4twitch.checks;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.User;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.service.ChannelLogService;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.service.UserService;
-import me.philippheuer.twitch4j.events.event.AbstractChannelEvent;
-import me.philippheuer.twitch4j.events.event.irc.ChannelMessageActionEvent;
-import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
+import me.philippheuer.twitch4j.events.Event;
+import me.philippheuer.twitch4j.events.event.irc.IRCMessageEvent;
 
 import javax.persistence.NoResultException;
 
-import static com.github.philippheuer.chatbot4twitch.checks.UserPermissionCheck.isMod;
-import static com.github.philippheuer.chatbot4twitch.checks.UserPermissionCheck.isSub;
+import static com.github.philippheuer.chatbot4twitch.features.WordFilter.isMod;
+import static com.github.philippheuer.chatbot4twitch.features.WordFilter.isSub;
+
 
 public class BadWordCheck {
-    private static boolean isQuest(String message) {
+    public static boolean isQuest(String message) {
         return (message.toLowerCase().matches(".*(80|160).*(#\\d{4,5}).*") || message.toLowerCase().matches(".*(#\\d{4,5}).*(80|160).*"));
     }
 
-    private static boolean isSilver(String message) {
-        return message.matches(".* +s1lverQ[1-3]? +.*s1lverQ[1-3]? +.*");
+    public static boolean isSilver(String message) {
+        return message.matches(".*s1lverQ[1-3]?.*s1lverQ[1-3]?.*");
     }
 
-    private static boolean isGoose(String message) {
+    public static boolean isGoose(String message) {
         return ((message.length() / 2) > (getLettersAndNumbersCount(message)) && (message.length() > 25));
     }
 
@@ -38,31 +38,25 @@ public class BadWordCheck {
         return count;
     }
 
-    private static int getCopyPasteCountFromDB(AbstractChannelEvent event) {
+    public static int getCopyPasteCountFromDB(Event event) {
         String message = "";
         String nickname = "";
         String channel = "";
         Long twitchId = 0L;
 
-        if (event instanceof ChannelMessageEvent) {
-            message = ((ChannelMessageEvent) event).getMessage();
-            nickname = ((ChannelMessageEvent) event).getUser().getDisplayName();
-            channel = "#" + event.getChannel().getName();
-            twitchId = ((ChannelMessageEvent) event).getUser().getId();
+        if (event instanceof IRCMessageEvent) {
+            message = ((IRCMessageEvent) event).getMessage().orElse("");
+            twitchId = ((IRCMessageEvent) event).getUserId();
+            nickname = getDisplayNameFromRawMessage(((IRCMessageEvent) event).getRawMessage());
+            channel = "#" + ((IRCMessageEvent) event).getChannelName().orElse("");
 
-        } else if (event instanceof ChannelMessageActionEvent) {
-            message = ((ChannelMessageActionEvent) event).getMessage();
-            nickname = ((ChannelMessageActionEvent) event).getUser().getDisplayName();
-            channel = "#" + event.getChannel().getName();
-            twitchId = ((ChannelMessageActionEvent) event).getUser().getId();
         }
+
         try {
             if (!message.equals("")) {
                 UserService userService = new UserService();
                 ChannelLogService logService = new ChannelLogService();
-
                 User user = userService.getUserByIdAndChannel(twitchId, channel);
-
                 int copypasteCounter = user.getCopypasteCount();
                 String previousMessage = logService.getPreviousMessage(nickname, channel);
 
@@ -71,9 +65,8 @@ public class BadWordCheck {
                 }
 
                 if ((previousMessage != null) && ((leviAlg(previousMessage, message) < (message.length() / 4)) && (message.length() > 25))) {
-                    user.setCopypasteCount(copypasteCounter++);
+                    user.setCopypasteCount(++copypasteCounter);
                     userService.updateUser(user);
-                    copypasteCounter++;
                 } else {
                     user.setCopypasteCount(0);
                     userService.updateUser(user);
@@ -88,6 +81,15 @@ public class BadWordCheck {
         }
     }
 
+    private static String getDisplayNameFromRawMessage(String message) {
+        String[] strings = message.split("[=;]");
+        for (int i = 0; i < strings.length; i++) {
+            if (strings[i].equals("display-name")) {
+                return strings[i + 1];
+            }
+        }
+        return "";
+    }
 
     private static int leviAlg(String S1, String S2) {
         int m = S1.length(), n = S2.length();
@@ -114,49 +116,6 @@ public class BadWordCheck {
             }
         }
         return D2[n];
-    }
-
-    public static void responseToBadMessage(AbstractChannelEvent event, String nickname, String message) {
-
-        int copyasteCounter = getCopyPasteCountFromDB(event);
-
-        int MAX_SPAM_COUNT = 2;
-        if (isGoose(message)) {
-            if (isSub(event)) {
-                event.timeoutUser(nickname, 1000, "Гусь-гидра");//;sendMessage(String.format(".timeout %s 1 Гусь-гидра", userName));
-                event.sendMessage(String.format("@%s , не хулигань", nickname));
-            } else if (isMod(event)) {
-                event.sendMessage(String.format("@%s , не хулигань", nickname));
-            } else {
-                event.timeoutUser(nickname, 600000, "Гусь-гидра");
-                event.sendMessage(String.format("@%s , не хулигань", nickname));
-            }
-        } else if (isSilver(message)) {
-            if ((isSub(event)) || (isMod(event))) {
-                event.sendMessage(String.format("@%s , фу, какая мерзкая харя.", nickname));
-            } else {
-                event.timeoutUser(nickname, 600000, "Рожа Сильвера");
-                event.sendMessage(String.format("@%s , фу, какая мерзкая харя.", nickname));
-            }
-        } else if (message.toLowerCase().matches(".*卐.*")) {
-            if (isSub(event)) {
-                event.timeoutUser(nickname, 1000, "Свастика");
-            } else if (isMod(event)) {
-                event.sendMessage(String.format("@%s , не хулигань", nickname));
-            } else {
-                event.timeoutUser(nickname, 1800000, "Свастика");
-            }
-        } else if (isQuest(message)) {
-            if (!(isSub(event) || isMod(event))) {
-                event.timeoutUser(nickname, 600000, "Дейлик");
-            }
-        } else if (copyasteCounter == MAX_SPAM_COUNT) {
-            event.sendMessage(String.format("@%s , прекрати копипастить.", nickname));
-
-        } else if (copyasteCounter > MAX_SPAM_COUNT) {
-            event.timeoutUser(nickname, 600000, "Копипаста");
-            event.sendMessage(String.format("@%s , прекрати копипастить.", nickname));
-        }
     }
 }
 

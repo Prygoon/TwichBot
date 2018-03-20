@@ -10,7 +10,8 @@ import me.philippheuer.twitch4j.message.commands.CommandPermission;
 import java.text.SimpleDateFormat;
 import java.util.Stack;
 
-import static com.github.philippheuer.chatbot4twitch.checks.UserPermissionCheck.isOwner;
+import static com.github.philippheuer.chatbot4twitch.features.WordFilter.isOwner;
+
 
 public class LastLog extends Command {
 
@@ -62,7 +63,7 @@ public class LastLog extends Command {
                 String logMessage = log.getMessage();
                 String response = date + " " + logNickname + ":" + logMessage;
                 // Send Response
-                if (isOwner(nickname, channel.substring(1))) {
+                if (isOwner(messageEvent)) {
                     sendMessageToChannel(channel.substring(1), String.format("@%s " + response, nickname));
                     try {
                         Thread.sleep(10);
@@ -79,7 +80,7 @@ public class LastLog extends Command {
                 }
             }
         } else {
-            if (isOwner(nickname, channel.substring(1))) {
+            if (isOwner(messageEvent)) {
                 sendMessageToChannel(channel, String.format("@%s Нет информации.", nickname));
             } else {
                 String response = String.format(" %s Нет информации.", nickname);
