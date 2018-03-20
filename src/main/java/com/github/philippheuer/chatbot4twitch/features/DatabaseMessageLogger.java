@@ -15,8 +15,6 @@ import javax.persistence.NoResultException;
 import java.sql.Timestamp;
 import java.util.*;
 
-import static com.github.philippheuer.chatbot4twitch.checks.BadWordCheck.*;
-
 public class DatabaseMessageLogger {
 
     /*private ChannelLogService logService;
@@ -92,11 +90,12 @@ public class DatabaseMessageLogger {
             try {
                 user = userService.getUserByIdAndChannel(twitchId, channel);
 
-                if (ChannelStatusCheck.isAlive(event)) {
+                if (!(user.getNickname().equals("nightbot") || user.getNickname().equals("moobot"))) {
+                    if (ChannelStatusCheck.isAlive(event)) {
 
-                    user.setMessageCount(user.getMessageCount() + 1);
-                    user.setWordCount(user.getWordCount() + message.split(" ").length);
-
+                        user.setMessageCount(user.getMessageCount() + 1);
+                        user.setWordCount(user.getWordCount() + message.split(" ").length);
+                    }
                 }
 
                 if (user.getTwitchId() == 0) {
@@ -119,6 +118,8 @@ public class DatabaseMessageLogger {
                 user.setNickname(nickname);
                 user.setChannel(channel);
                 user.setTwitchId(twitchId);
+                user.setMessageCount(1);
+                user.setWordCount(message.split(" ").length);
 
                 userService.addUser(user);
 

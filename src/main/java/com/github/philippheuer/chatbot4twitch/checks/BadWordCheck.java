@@ -47,9 +47,12 @@ public class BadWordCheck {
         if (event instanceof IRCMessageEvent) {
             message = ((IRCMessageEvent) event).getMessage().orElse("");
             twitchId = ((IRCMessageEvent) event).getUserId();
-            nickname = getDisplayNameFromRawMessage(((IRCMessageEvent) event).getRawMessage());
             channel = "#" + ((IRCMessageEvent) event).getChannelName().orElse("");
+            nickname = getDisplayNameFromRawMessage(((IRCMessageEvent) event).getRawMessage());
 
+            if (nickname.equals("") && ((IRCMessageEvent) event).getClientName().isPresent()) {
+                nickname = ((IRCMessageEvent) event).getClientName().get();
+            }
         }
 
         try {

@@ -57,21 +57,21 @@ public class Bot {
         //twitchClient.getCommandHandler().registerCommand(Help.class);
         //Subscribers
         //twitchClient.getCommandHandler().registerCommand(FollowAge.class);
-        twitchClient.getCommandHandler().registerCommand(WordCount.class);
+        //twitchClient.getCommandHandler().registerCommand(WordCount.class);
         // Moderation
         //twitchClient.getCommandHandler().registerCommand(Top.class);
         //twitchClient.getCommandHandler().registerCommand(CommandAdd.class);
         //twitchClient.getCommandHandler().registerCommand(CommandRemove.class);
         //twitchClient.getCommandHandler().registerCommand(LastLog.class);
-        twitchClient.getCommandHandler().registerCommand(new TwitchIdCollector());
-        twitchClient.getCommandHandler().registerCommand(new NickNameCollector());
+        //twitchClient.getCommandHandler().registerCommand(new TwitchIdCollector());
+        //twitchClient.getCommandHandler().registerCommand(new NickNameCollector());
     }
 
     /**
      * Method to register all features
      */
     public void registerFeatures() {
-        twitchClient.getDispatcher().registerListener(new WordFilter());
+        //twitchClient.getDispatcher().registerListener(new WordFilter());
         //twitchClient.getDispatcher().registerListener(new ChannelNotificationOnFollow());
         //twitchClient.getDispatcher().registerListener(new ChannelNotificationOnSubscription());
         //twitchClient.getDispatcher().registerListener(new ChannelNotificationOnDonation());
