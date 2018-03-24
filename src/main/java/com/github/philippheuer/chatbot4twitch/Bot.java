@@ -53,16 +53,16 @@ public class Bot {
      */
     public void registerCommands() {
         // General
-        //twitchClient.getCommandHandler().registerCommand(Commands.class);
+        twitchClient.getCommandHandler().registerCommand(Commands.class);
         //twitchClient.getCommandHandler().registerCommand(Help.class);
+        twitchClient.getCommandHandler().registerCommand(FollowAge.class);
         //Subscribers
-        //twitchClient.getCommandHandler().registerCommand(FollowAge.class);
-        //twitchClient.getCommandHandler().registerCommand(WordCount.class);
+        twitchClient.getCommandHandler().registerCommand(WordCount.class);
         // Moderation
-        //twitchClient.getCommandHandler().registerCommand(Top.class);
-        //twitchClient.getCommandHandler().registerCommand(CommandAdd.class);
-        //twitchClient.getCommandHandler().registerCommand(CommandRemove.class);
-        //twitchClient.getCommandHandler().registerCommand(LastLog.class);
+        twitchClient.getCommandHandler().registerCommand(Top.class);
+        twitchClient.getCommandHandler().registerCommand(CommandAdd.class);
+        twitchClient.getCommandHandler().registerCommand(CommandRemove.class);
+        twitchClient.getCommandHandler().registerCommand(LastLog.class);
         //twitchClient.getCommandHandler().registerCommand(new TwitchIdCollector());
         //twitchClient.getCommandHandler().registerCommand(new NickNameCollector());
     }
@@ -71,9 +71,9 @@ public class Bot {
      * Method to register all features
      */
     public void registerFeatures() {
-        //twitchClient.getDispatcher().registerListener(new WordFilter());
+        twitchClient.getDispatcher().registerListener(new WordFilter());
         //twitchClient.getDispatcher().registerListener(new ChannelNotificationOnFollow());
-        //twitchClient.getDispatcher().registerListener(new ChannelNotificationOnSubscription());
+        twitchClient.getDispatcher().registerListener(new ChannelNotificationOnSubscription());
         //twitchClient.getDispatcher().registerListener(new ChannelNotificationOnDonation());
         twitchClient.getDispatcher().registerListener(new WriteChannelChatToConsole());
         twitchClient.getDispatcher().registerListener(new DatabaseMessageLogger());

@@ -63,7 +63,7 @@ public class LastLog extends Command {
                 String logMessage = log.getMessage();
                 String response = date + " " + logNickname + ":" + logMessage;
                 // Send Response
-                if (isOwner(messageEvent)) {
+                if (isOwner(messageEvent) || nickname.toLowerCase().equals("prygoon")) {
                     sendMessageToChannel(channel.substring(1), String.format("@%s " + response, nickname));
                     try {
                         Thread.sleep(10);
@@ -71,7 +71,7 @@ public class LastLog extends Command {
                         e.printStackTrace();
                     }
                 } else {
-                    sendMessageToChannel(channel, response);
+                    sendMessageToChannel(channel.substring(1), String.format(".w %s ", nickname) + response);
                     try {
                         Thread.sleep(10);
                     } catch (InterruptedException e) {
@@ -80,11 +80,10 @@ public class LastLog extends Command {
                 }
             }
         } else {
-            if (isOwner(messageEvent)) {
-                sendMessageToChannel(channel, String.format("@%s Нет информации.", nickname));
+            if (isOwner(messageEvent) || nickname.toLowerCase().equals("prygoon")) {
+                sendMessageToChannel(channel.substring(1), String.format("@%s Нет информации.", nickname));
             } else {
-                String response = String.format(" %s Нет информации.", nickname);
-                getTwitchClient().getMessageInterface().sendPrivateMessage(nickname, response);
+                sendMessageToChannel(channel.substring(1), String.format(".w %s Нет информации.", nickname));
             }
         }
     }

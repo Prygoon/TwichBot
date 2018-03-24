@@ -32,7 +32,7 @@ public class WriteChannelChatToConsole {
             message = "[ACTION]" + ((ChannelMessageActionEvent) event).getMessage();
         }
         if ((message != null) && (user != null)) {*/
-        System.out.println("Channel [" + event.getChannelName().orElse("") + "] Type " + event.getClientName() + " - Message [" + event.getRawMessage() + "]");
+        System.out.println("Channel [" + event.getChannelName().orElse("") + "] Type " + event.getCommandType() + " - Message [" + event.getRawMessage() + "]");
         //}
     }
 }

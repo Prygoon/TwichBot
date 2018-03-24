@@ -5,6 +5,7 @@ import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.ChannelLog;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.User;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.service.ChannelLogService;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.service.UserService;
+import com.github.philippheuer.chatbot4twitch.enums.Bots;
 import me.philippheuer.twitch4j.events.EventSubscriber;
 import me.philippheuer.twitch4j.events.event.AbstractChannelEvent;
 import me.philippheuer.twitch4j.events.event.irc.ChannelMessageActionEvent;
@@ -14,17 +15,11 @@ import org.hibernate.NonUniqueResultException;
 import javax.persistence.NoResultException;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DatabaseMessageLogger {
 
-    /*private ChannelLogService logService;
-    private String displayNickname;
-    private String nickname;
-    private String channel;
-    private String message;
-    private ChannelLog log;*/
-
-    @EventSubscriber
+        @EventSubscriber
     public void onChannelMessage(ChannelMessageEvent event) {
         String displayNickname = event.getUser().getDisplayName();
         String channel = "#" + event.getChannel().getName();
@@ -39,8 +34,6 @@ public class DatabaseMessageLogger {
         log.setTimestamp(new Timestamp(Calendar.getInstance().getTimeInMillis()));
 
         logService.addLog(log);
-
-        //responseToBadMessage(event, nickname, message);
 
         increaseWordAndMessageCounts(event);
     }
@@ -60,8 +53,6 @@ public class DatabaseMessageLogger {
         log.setTimestamp(new Timestamp(Calendar.getInstance().getTimeInMillis()));
 
         logService.addLog(log);
-
-        //responseToBadMessage(event, nickname, message);
 
         increaseWordAndMessageCounts(event);
     }
@@ -90,12 +81,9 @@ public class DatabaseMessageLogger {
             try {
                 user = userService.getUserByIdAndChannel(twitchId, channel);
 
-                if (!(user.getNickname().equals("nightbot") || user.getNickname().equals("moobot"))) {
-                    if (ChannelStatusCheck.isAlive(event)) {
-
-                        user.setMessageCount(user.getMessageCount() + 1);
-                        user.setWordCount(user.getWordCount() + message.split(" ").length);
-                    }
+                if (!isKnownBot(nickname) && ChannelStatusCheck.isAlive(event)) {
+                    user.setMessageCount(user.getMessageCount() + 1);
+                    user.setWordCount(user.getWordCount() + message.split(" ").length);
                 }
 
                 if (user.getTwitchId() == 0) {
@@ -162,5 +150,14 @@ public class DatabaseMessageLogger {
         return "";
     }
 
+    private boolean isKnownBot(String nickname) {
+
+        Set<String> bots = Arrays.stream(Bots.values())
+                .map(Bots::getNickname)
+                .distinct()
+                .collect(Collectors.toSet());
+
+        return bots.contains(nickname);
+    }
 }
 

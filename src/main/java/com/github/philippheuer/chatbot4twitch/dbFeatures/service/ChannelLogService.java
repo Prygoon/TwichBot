@@ -46,7 +46,7 @@ public class ChannelLogService extends SessionUtil implements ChannelLogDao {
 
     @Override
     public Stack<ChannelLog> getLastLog(String channel, String nickname) {
-        Stack<ChannelLog> lastLogStack = new Stack<>();
+        Stack<ChannelLog> logs = new Stack<>();
 
 
         final int lastlogStringsQuantity = 3;
@@ -54,17 +54,18 @@ public class ChannelLogService extends SessionUtil implements ChannelLogDao {
                 "where log.channel like :channel " +
                 "and lower(log.nickname) like :nickname " +
                 "order by log.timestamp desc";
+
         openSession();
 
         Session session = getSession();
         Query query = session.createQuery(sql);
         query.setParameter("channel", channel);
         query.setParameter("nickname", nickname.toLowerCase());
-        lastLogStack.addAll(query.setMaxResults(lastlogStringsQuantity).list());
+        logs.addAll(query.setMaxResults(lastlogStringsQuantity).list());
 
         closeSession();
 
-        return lastLogStack;
+        return logs;
     }
 
     @Override

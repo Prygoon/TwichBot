@@ -17,7 +17,7 @@ public class WordFilter {
         int copyasteCounter = getCopyPasteCountFromDB(event);
         final int MAX_SPAM_COUNT = 2;
 
-        if (!(message.equals("") && nickname.equals(""))) {
+        if (!(message.equals("") && nickname.equals("")) && event.getCommandType().equals("PRIVMSG")) {
             if (isGoose(message)) {
                 if (isSub(event)) {
                     event.getClient().getMessageInterface().sendMessage(channel, String.format(".timeout %s 1 Гусь-гидра", nickname));
@@ -66,6 +66,6 @@ public class WordFilter {
     }
 
     public static boolean isOwner(Event event) {
-        return event instanceof IRCMessageEvent && ((IRCMessageEvent) event).getBadges().containsKey("broadcaster");
+        return (event instanceof IRCMessageEvent && ((IRCMessageEvent) event).getBadges().containsKey("broadcaster"));
     }
 }

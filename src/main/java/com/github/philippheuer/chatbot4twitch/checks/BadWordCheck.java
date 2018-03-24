@@ -44,7 +44,7 @@ public class BadWordCheck {
         String channel = "";
         Long twitchId = 0L;
 
-        if (event instanceof IRCMessageEvent) {
+        if ((event instanceof IRCMessageEvent) && ((IRCMessageEvent) event).getCommandType().equals("PRIVMSG")) {
             message = ((IRCMessageEvent) event).getMessage().orElse("");
             twitchId = ((IRCMessageEvent) event).getUserId();
             channel = "#" + ((IRCMessageEvent) event).getChannelName().orElse("");
