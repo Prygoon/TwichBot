@@ -118,7 +118,7 @@ public class DatabaseMessageLogger {
                     userDao.updateUser(rightUser);
 
                     userDao.deleteUserById(wrongUser);
-                    System.out.println(wrongUser.getDisplayNickname() + "DELETED");
+                    System.out.println(wrongUser.getDisplayNickname() + " DELETED");
                 }
             }
         }
