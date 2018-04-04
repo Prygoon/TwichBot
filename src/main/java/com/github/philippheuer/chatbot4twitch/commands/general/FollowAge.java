@@ -18,8 +18,8 @@ public class FollowAge extends Command {
 
         // Command Configuration
         setCommand("followage");
-        setCommandAliases(new String[]{"followsince", "following"});
-        setCategory("subscribers");
+        setCommandAliases(new String[]{"fa", "following"});
+        setCategory("general");
         setDescription("Display's the first follow date!");
         getRequiredPermissions().add(CommandPermission.EVERYONE);
         setUsageExample("");
@@ -39,13 +39,17 @@ public class FollowAge extends Command {
         Optional<Follow> follow = getTwitchClient().getUserEndpoint().checkUserFollowByChannel(commandTarget.getId(), messageEvent.getChannel().getId());
         // Response
         // Following
+
         String response = follow.map(follow1 -> String.format("@%s ты подписан на %s c %s!", commandTarget.getDisplayName(),
                 messageEvent.getChannel().getDisplayName(),
                 (dateFormat.format(follow1.getCreatedAt()))))
                 // Not Following
                 .orElseGet(() -> String.format("%s еще пока не фолловер", commandTarget.getDisplayName()));
-        sendMessageToChannel(messageEvent.getChannel().getName(), response);
 
+        if (messageEvent.getPermissions().contains(CommandPermission.EVERYONE)) {
+            sendMessageToChannel(messageEvent.getChannel().getName(), String.format(".w %s", commandTarget.getName()) + response);
+        } else {
+            sendMessageToChannel(messageEvent.getChannel().getName(), response);
+        }
     }
-
 }

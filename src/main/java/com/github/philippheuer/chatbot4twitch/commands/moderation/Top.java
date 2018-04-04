@@ -2,8 +2,8 @@
 package com.github.philippheuer.chatbot4twitch.commands.moderation;
 
 import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.User;
-import com.github.philippheuer.chatbot4twitch.dbFeatures.service.ChannelLogService;
-import com.github.philippheuer.chatbot4twitch.dbFeatures.service.UserService;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.dao.ChannelLogDao;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.dao.UserDao;
 import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
 import me.philippheuer.twitch4j.message.commands.Command;
 import me.philippheuer.twitch4j.message.commands.CommandPermission;
@@ -38,11 +38,11 @@ public class Top extends Command {
         super.executeCommand(messageEvent);
 
         String channel = "#" + messageEvent.getChannel().getName();
-        UserService userService = new UserService();
-        ChannelLogService logService = new ChannelLogService();
+        UserDao userDao = new UserDao();
+        ChannelLogDao logService = new ChannelLogDao();
 
         // Prepare Response
-        List<User> flooders = userService.getTopFiveFlooders(channel);
+        List<User> flooders = userDao.getTopFiveFlooders(channel);
         StringBuilder builder = new StringBuilder(String.format("Нафлудили с %s. ", logService.getFirstData(channel)));
 
         int n = flooders.size();

@@ -1,7 +1,7 @@
 package com.github.philippheuer.chatbot4twitch.enums;
 
 public enum Bots {
-    NIGHTBOT("Nightbot"),
+    NIGHTBOT("nightbot"),
     MOOBOT("moobot"),
     LILERINE("lilerine"),
     MARYATTIBOTE("maryattibote");

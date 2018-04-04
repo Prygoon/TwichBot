@@ -3,8 +3,8 @@ package com.github.philippheuer.chatbot4twitch.features;
 import com.github.philippheuer.chatbot4twitch.checks.ChannelStatusCheck;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.ChannelLog;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.User;
-import com.github.philippheuer.chatbot4twitch.dbFeatures.service.ChannelLogService;
-import com.github.philippheuer.chatbot4twitch.dbFeatures.service.UserService;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.dao.ChannelLogDao;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.dao.UserDao;
 import com.github.philippheuer.chatbot4twitch.enums.Bots;
 import me.philippheuer.twitch4j.events.EventSubscriber;
 import me.philippheuer.twitch4j.events.event.AbstractChannelEvent;
@@ -19,13 +19,13 @@ import java.util.stream.Collectors;
 
 public class DatabaseMessageLogger {
 
-        @EventSubscriber
+    @EventSubscriber
     public void onChannelMessage(ChannelMessageEvent event) {
         String displayNickname = event.getUser().getDisplayName();
         String channel = "#" + event.getChannel().getName();
         String message = event.getMessage();
 
-        ChannelLogService logService = new ChannelLogService();
+        ChannelLogDao logDao = new ChannelLogDao();
 
         ChannelLog log = new ChannelLog();
         log.setChannel(channel);
@@ -33,7 +33,7 @@ public class DatabaseMessageLogger {
         log.setMessage(message);
         log.setTimestamp(new Timestamp(Calendar.getInstance().getTimeInMillis()));
 
-        logService.addLog(log);
+        logDao.addLog(log);
 
         increaseWordAndMessageCounts(event);
     }
@@ -44,7 +44,7 @@ public class DatabaseMessageLogger {
         String channel = "#" + event.getChannel().getName();
         String message = "[ACTION]" + event.getMessage();
 
-        ChannelLogService logService = new ChannelLogService();
+        ChannelLogDao logDao = new ChannelLogDao();
 
         ChannelLog log = new ChannelLog();
         log.setChannel(channel);
@@ -52,34 +52,23 @@ public class DatabaseMessageLogger {
         log.setMessage(message);
         log.setTimestamp(new Timestamp(Calendar.getInstance().getTimeInMillis()));
 
-        logService.addLog(log);
+        logDao.addLog(log);
 
         increaseWordAndMessageCounts(event);
     }
 
     private void increaseWordAndMessageCounts(AbstractChannelEvent event) {
-        String message = "";
+        String message = getMessageFromAbstractChannelEvent(event);
         String channel = "#" + event.getChannel().getName();
-        String nickname = "";
-        String displayNickname = "";
+        String nickname = getNicknameFromAbstractChannelEvent(event);
+        String displayNickname = getDisplayNicknameFromAbstractChannelEvent(event);
         User user;
-        UserService userService = new UserService();
-        Long twitchId = getTwitchIdFromEvent(event);
-
-        if (event instanceof ChannelMessageEvent) {
-            message = ((ChannelMessageEvent) event).getMessage();
-            nickname = ((ChannelMessageEvent) event).getUser().getName();
-            displayNickname = ((ChannelMessageEvent) event).getUser().getDisplayName();
-
-        } else if (event instanceof ChannelMessageActionEvent) {
-            message = ((ChannelMessageActionEvent) event).getMessage();
-            nickname = ((ChannelMessageActionEvent) event).getUser().getName();
-            displayNickname = ((ChannelMessageActionEvent) event).getUser().getDisplayName();
-        }
+        UserDao userDao = new UserDao();
+        Long twitchId = getTwitchIdFromAbstractChannelEvent(event);
 
         if (!(message.equals("") && nickname.equals("") && displayNickname.equals(""))) {
             try {
-                user = userService.getUserByIdAndChannel(twitchId, channel);
+                user = userDao.getUserByIdAndChannel(twitchId, channel);
 
                 if (!isKnownBot(nickname) && ChannelStatusCheck.isAlive(event)) {
                     user.setMessageCount(user.getMessageCount() + 1);
@@ -94,11 +83,15 @@ public class DatabaseMessageLogger {
                     user.setNickname(nickname);
                 }
 
-                if (!user.getDisplayNickname().equals(getDisplayNicknameFromEvent(event))) {
+                if (!user.getDisplayNickname().equals(displayNickname)) {
                     user.setDisplayNickname(displayNickname);
                 }
 
-                userService.updateUser(user);
+                if (!user.getNickname().equals(nickname)) {
+                    user.setNickname(nickname);
+                }
+
+                userDao.updateUser(user);
 
             } catch (NoResultException ex) {
                 user = new User();
@@ -109,22 +102,29 @@ public class DatabaseMessageLogger {
                 user.setMessageCount(1);
                 user.setWordCount(message.split(" ").length);
 
-                userService.addUser(user);
+                userDao.addUser(user);
 
             } catch (NonUniqueResultException ex) {
-                List<User> duplicateUsers = userService.getDuplicateUsers(twitchId, channel);
-                Optional<User> optionalWrongUser = duplicateUsers.stream().min(Comparator.comparingInt(User::getMessageCount));
+                List<User> duplicateUsers = userDao.getDuplicateUsers(twitchId, channel);
 
-                if (optionalWrongUser.isPresent()) {
+                Optional<User> optionalWrongUser = duplicateUsers.stream().min(Comparator.comparingInt(User::getMessageCount));
+                Optional<User> optionalRightUser = duplicateUsers.stream().max(Comparator.comparingInt(User::getMessageCount));
+
+                if (optionalWrongUser.isPresent() && optionalRightUser.isPresent()) {
                     User wrongUser = optionalWrongUser.get();
-                    userService.deleteDuplicateUser(wrongUser);
-                    System.out.println("DELETED");
+                    User rightUser = optionalRightUser.get();
+                    rightUser.setMessageCount(wrongUser.getMessageCount() + rightUser.getMessageCount());
+                    rightUser.setWordCount(wrongUser.getWordCount() + rightUser.getWordCount());
+                    userDao.updateUser(rightUser);
+
+                    userDao.deleteUserById(wrongUser);
+                    System.out.println(wrongUser.getDisplayNickname() + "DELETED");
                 }
             }
         }
     }
 
-    private Long getTwitchIdFromEvent(AbstractChannelEvent event) {
+    private Long getTwitchIdFromAbstractChannelEvent(AbstractChannelEvent event) {
 
         if (event instanceof ChannelMessageEvent) {
             return ((ChannelMessageEvent) event).getUser().getId();
@@ -137,7 +137,7 @@ public class DatabaseMessageLogger {
         return 0L;
     }
 
-    private String getDisplayNicknameFromEvent(AbstractChannelEvent event) {
+    private String getDisplayNicknameFromAbstractChannelEvent(AbstractChannelEvent event) {
 
         if (event instanceof ChannelMessageEvent) {
             return ((ChannelMessageEvent) event).getUser().getDisplayName();
@@ -145,6 +145,32 @@ public class DatabaseMessageLogger {
 
         if (event instanceof ChannelMessageActionEvent) {
             return ((ChannelMessageActionEvent) event).getUser().getDisplayName();
+        }
+
+        return "";
+    }
+
+    private String getNicknameFromAbstractChannelEvent(AbstractChannelEvent event) {
+
+        if (event instanceof ChannelMessageEvent) {
+            return ((ChannelMessageEvent) event).getUser().getName();
+        }
+
+        if (event instanceof ChannelMessageActionEvent) {
+            return ((ChannelMessageActionEvent) event).getUser().getName();
+        }
+
+        return "";
+    }
+
+    private String getMessageFromAbstractChannelEvent(AbstractChannelEvent event) {
+
+        if (event instanceof ChannelMessageEvent) {
+            return ((ChannelMessageEvent) event).getMessage();
+        }
+
+        if (event instanceof ChannelMessageActionEvent) {
+            return ((ChannelMessageActionEvent) event).getMessage();
         }
 
         return "";

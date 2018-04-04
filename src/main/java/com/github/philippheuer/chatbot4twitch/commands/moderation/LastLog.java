@@ -2,7 +2,7 @@
 package com.github.philippheuer.chatbot4twitch.commands.moderation;
 
 import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.ChannelLog;
-import com.github.philippheuer.chatbot4twitch.dbFeatures.service.ChannelLogService;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.dao.ChannelLogDao;
 import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
 import me.philippheuer.twitch4j.message.commands.Command;
 import me.philippheuer.twitch4j.message.commands.CommandPermission;
@@ -51,7 +51,7 @@ public class LastLog extends Command {
         }
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("[yyyy-MM-dd HH:mm:ss]");
-        ChannelLogService logService = new ChannelLogService();
+        ChannelLogDao logService = new ChannelLogDao();
         Stack<ChannelLog> lastLog = logService.getLastLog(channel, commandTarget);
         int lastLogSize = lastLog.size();
 

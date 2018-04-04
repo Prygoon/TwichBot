@@ -2,10 +2,11 @@
 package com.github.philippheuer.chatbot4twitch.checks;
 
 import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.User;
-import com.github.philippheuer.chatbot4twitch.dbFeatures.service.ChannelLogService;
-import com.github.philippheuer.chatbot4twitch.dbFeatures.service.UserService;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.dao.ChannelLogDao;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.dao.UserDao;
 import me.philippheuer.twitch4j.events.Event;
 import me.philippheuer.twitch4j.events.event.irc.IRCMessageEvent;
+import org.hibernate.NonUniqueResultException;
 
 import javax.persistence.NoResultException;
 
@@ -39,49 +40,46 @@ public class BadWordCheck {
     }
 
     public static int getCopyPasteCountFromDB(Event event) {
-        String message = "";
-        String nickname = "";
-        String channel = "";
-        Long twitchId = 0L;
-
         if ((event instanceof IRCMessageEvent) && ((IRCMessageEvent) event).getCommandType().equals("PRIVMSG")) {
-            message = ((IRCMessageEvent) event).getMessage().orElse("");
-            twitchId = ((IRCMessageEvent) event).getUserId();
-            channel = "#" + ((IRCMessageEvent) event).getChannelName().orElse("");
-            nickname = getDisplayNameFromRawMessage(((IRCMessageEvent) event).getRawMessage());
+
+
+            String message = ((IRCMessageEvent) event).getMessage().orElse("");
+            Long twitchId = ((IRCMessageEvent) event).getUserId();
+            String channel = "#" + ((IRCMessageEvent) event).getChannelName().orElse("");
+            String nickname = getDisplayNameFromRawMessage(((IRCMessageEvent) event).getRawMessage());
 
             if (nickname.equals("") && ((IRCMessageEvent) event).getClientName().isPresent()) {
                 nickname = ((IRCMessageEvent) event).getClientName().get();
             }
-        }
 
-        try {
-            if (!message.equals("")) {
-                UserService userService = new UserService();
-                ChannelLogService logService = new ChannelLogService();
-                User user = userService.getUserByIdAndChannel(twitchId, channel);
-                int copypasteCounter = user.getCopypasteCount();
-                String previousMessage = logService.getPreviousMessage(nickname, channel);
+            try {
+                if (!message.equals("")) {
+                    UserDao userDao = new UserDao();
+                    ChannelLogDao logDao = new ChannelLogDao();
+                    User user = userDao.getUserByIdAndChannel(twitchId, channel);
+                    int copypasteCounter = user.getCopypasteCount();
+                    String previousMessage = logDao.getPreviousMessage(nickname, channel);
 
-                if (isSub(event) || isMod(event)) {
-                    return 0;
+                    if (isSub(event) || isMod(event)) {
+                        return 0;
+                    }
+
+                    if ((previousMessage != null) && ((leviAlg(previousMessage, message) < (message.length() / 4)) && (message.length() > 25))) {
+                        user.setCopypasteCount(++copypasteCounter);
+                        userDao.updateUser(user);
+                    } else {
+                        user.setCopypasteCount(0);
+                        userDao.updateUser(user);
+                        copypasteCounter = 0;
+                    }
+                    return copypasteCounter;
                 }
 
-                if ((previousMessage != null) && ((leviAlg(previousMessage, message) < (message.length() / 4)) && (message.length() > 25))) {
-                    user.setCopypasteCount(++copypasteCounter);
-                    userService.updateUser(user);
-                } else {
-                    user.setCopypasteCount(0);
-                    userService.updateUser(user);
-                    copypasteCounter = 0;
-                }
-                return copypasteCounter;
-            } else {
-                return 0;
+            } catch (NoResultException | NonUniqueResultException ignored) {
+
             }
-        } catch (NoResultException ignored) {
-            return 0;
         }
+        return 0;
     }
 
     private static String getDisplayNameFromRawMessage(String message) {

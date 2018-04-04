@@ -1,7 +1,7 @@
 package com.github.philippheuer.chatbot4twitch.commands.moderation;
 
 import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.User;
-import com.github.philippheuer.chatbot4twitch.dbFeatures.service.UserService;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.dao.UserDao;
 import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
 import me.philippheuer.twitch4j.message.commands.Command;
 import me.philippheuer.twitch4j.message.commands.CommandPermission;
@@ -28,8 +28,8 @@ public class TwitchIdCollector extends Command {
         super.executeCommand(messageEvent);
 
         if ((messageEvent.getUser().getName().equalsIgnoreCase("Prygoon")) && messageEvent.getChannel().getName().equalsIgnoreCase("dekeva")) {
-            UserService userService = new UserService();
-            List<User> allUsersWithoutTwitchId = userService.getAllUsersWithoutTwitchId();
+            UserDao userDao = new UserDao();
+            List<User> allUsersWithoutTwitchId = userDao.getAllUsersWithoutTwitchId();
 
 
             for (User anAllUsersWithoutTwitchId : allUsersWithoutTwitchId) {
@@ -41,7 +41,7 @@ public class TwitchIdCollector extends Command {
 
                         Long twitchId = getTwitchClient().getUserEndpoint().getUserIdByUserName(anAllUsersWithoutTwitchId.getDisplayNickname()).orElse(0L);
                         anAllUsersWithoutTwitchId.setTwitchId(twitchId);
-                        userService.updateUser(anAllUsersWithoutTwitchId);
+                        userDao.updateUser(anAllUsersWithoutTwitchId);
                     }
                     /*try {
                         Thread.sleep(100);
