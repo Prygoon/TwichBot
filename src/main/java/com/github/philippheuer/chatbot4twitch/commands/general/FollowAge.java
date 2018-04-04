@@ -46,10 +46,16 @@ public class FollowAge extends Command {
                 // Not Following
                 .orElseGet(() -> String.format("%s еще пока не фолловер", commandTarget.getDisplayName()));
 
-        if (messageEvent.getPermissions().contains(CommandPermission.EVERYONE)) {
-            sendMessageToChannel(messageEvent.getChannel().getName(), String.format(".w %s", commandTarget.getName()) + response);
-        } else {
+        if (isSubOrMod(messageEvent)) {
             sendMessageToChannel(messageEvent.getChannel().getName(), response);
+        } else {
+            sendMessageToChannel(messageEvent.getChannel().getName(), String.format(".w %s ", messageEvent.getUser().getName()) + response);
         }
+    }
+
+    private boolean isSubOrMod(ChannelMessageEvent event) {
+        return event.getPermissions().contains(CommandPermission.MODERATOR)
+                || event.getPermissions().contains(CommandPermission.SUBSCRIBER)
+                || event.getPermissions().contains(CommandPermission.OWNER);
     }
 }
