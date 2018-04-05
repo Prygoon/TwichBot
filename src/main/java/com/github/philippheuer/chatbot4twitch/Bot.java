@@ -3,16 +3,12 @@ package com.github.philippheuer.chatbot4twitch;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.philippheuer.chatbot4twitch.commands.general.Commands;
-import com.github.philippheuer.chatbot4twitch.commands.general.Help;
-import com.github.philippheuer.chatbot4twitch.commands.moderation.CommandAdd;
-import com.github.philippheuer.chatbot4twitch.commands.moderation.CommandRemove;
-import com.github.philippheuer.chatbot4twitch.commands.moderation.LastLog;
-import com.github.philippheuer.chatbot4twitch.commands.moderation.Top;
-import com.github.philippheuer.chatbot4twitch.commands.subscribers.FollowAge;
+import com.github.philippheuer.chatbot4twitch.commands.moderation.*;
+import com.github.philippheuer.chatbot4twitch.commands.general.FollowAge;
 import com.github.philippheuer.chatbot4twitch.commands.subscribers.WordCount;
 import com.github.philippheuer.chatbot4twitch.features.*;
 import me.philippheuer.twitch4j.TwitchClient;
-import me.philippheuer.twitch4j.auth.model.OAuthCredential;
+import me.philippheuer.twitch4j.TwitchClientBuilder;
 import me.philippheuer.twitch4j.endpoints.ChannelEndpoint;
 
 import java.io.File;
@@ -38,16 +34,18 @@ public class Bot {
         loadConfiguration();
 
         // Initialization
-        twitchClient = TwitchClient.builder()
-                .clientId(getConfiguration().getApi().get("twitch_client_id"))
-                .clientSecret(getConfiguration().getApi().get("twitch_client_secret"))
-                .ircCredential(new OAuthCredential(getConfiguration().getCredentials().get("irc")))
-                .configurationAutoSave(true)
-                .configurationDirectory(new File("config").getAbsolutePath())
+        twitchClient = TwitchClientBuilder.init()
+                .withClientId(getConfiguration().getApi().get("twitch_client_id"))
+                .withClientSecret(getConfiguration().getApi().get("twitch_client_secret"))
+                .withCredential(getConfiguration().getCredentials().get("irc"))
+                //.withCredentialRefreshToken("refresh")
+                .withAutoSaveConfiguration(true)
+                .withConfigurationDirectory(new File("config"))
                 .build();
 
         // Register this class to recieve events using the EventSubscriber Annotation
         twitchClient.getDispatcher().registerListener(this);
+        twitchClient.connect();
     }
 
     /**
@@ -57,14 +55,16 @@ public class Bot {
         // General
         twitchClient.getCommandHandler().registerCommand(Commands.class);
         //twitchClient.getCommandHandler().registerCommand(Help.class);
-        //Subscribers
         twitchClient.getCommandHandler().registerCommand(FollowAge.class);
+        //Subscribers
         twitchClient.getCommandHandler().registerCommand(WordCount.class);
         // Moderation
         twitchClient.getCommandHandler().registerCommand(Top.class);
         twitchClient.getCommandHandler().registerCommand(CommandAdd.class);
         twitchClient.getCommandHandler().registerCommand(CommandRemove.class);
         twitchClient.getCommandHandler().registerCommand(LastLog.class);
+        //twitchClient.getCommandHandler().registerCommand(new TwitchIdCollector());
+        //twitchClient.getCommandHandler().registerCommand(new NickNameCollector());
     }
 
     /**
@@ -76,7 +76,7 @@ public class Bot {
         twitchClient.getDispatcher().registerListener(new ChannelNotificationOnSubscription());
         //twitchClient.getDispatcher().registerListener(new ChannelNotificationOnDonation());
         twitchClient.getDispatcher().registerListener(new WriteChannelChatToConsole());
-        twitchClient.getDispatcher().registerListener(new LogToDB());
+        twitchClient.getDispatcher().registerListener(new DatabaseMessageLogger());
     }
 
     /**

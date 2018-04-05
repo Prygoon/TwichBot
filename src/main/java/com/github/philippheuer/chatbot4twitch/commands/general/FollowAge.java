@@ -1,8 +1,8 @@
-package com.github.philippheuer.chatbot4twitch.commands.subscribers;
+package com.github.philippheuer.chatbot4twitch.commands.general;
 
-import me.philippheuer.twitch4j.chat.commands.Command;
-import me.philippheuer.twitch4j.chat.commands.CommandPermission;
-import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
+import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
+import me.philippheuer.twitch4j.message.commands.Command;
+import me.philippheuer.twitch4j.message.commands.CommandPermission;
 import me.philippheuer.twitch4j.model.Follow;
 import me.philippheuer.twitch4j.model.User;
 
@@ -18,12 +18,10 @@ public class FollowAge extends Command {
 
         // Command Configuration
         setCommand("followage");
-        setCommandAliases(new String[]{"followsince", "following"});
-        setCategory("subscribers");
+        setCommandAliases(new String[]{"fa", "following"});
+        setCategory("general");
         setDescription("Display's the first follow date!");
-        getRequiredPermissions().add(CommandPermission.SUBSCRIBER);
-        getRequiredPermissions().add(CommandPermission.MODERATOR);
-        getRequiredPermissions().add(CommandPermission.BROADCASTER);
+        getRequiredPermissions().add(CommandPermission.EVERYONE);
         setUsageExample("");
     }
 
@@ -41,20 +39,23 @@ public class FollowAge extends Command {
         Optional<Follow> follow = getTwitchClient().getUserEndpoint().checkUserFollowByChannel(commandTarget.getId(), messageEvent.getChannel().getId());
         // Response
         // Following
-        // Not Following
+
         String response = follow.map(follow1 -> String.format("@%s ты подписан на %s c %s!", commandTarget.getDisplayName(),
                 messageEvent.getChannel().getDisplayName(),
                 (dateFormat.format(follow1.getCreatedAt()))))
+                // Not Following
                 .orElseGet(() -> String.format("%s еще пока не фолловер", commandTarget.getDisplayName()));
-        sendMessageToChannel(messageEvent.getChannel().getName(), response);
+
+        if (isSubOrMod(messageEvent)) {
+            sendMessageToChannel(messageEvent.getChannel().getName(), response);
+        } else {
+            sendMessageToChannel(messageEvent.getChannel().getName(), String.format(".w %s ", messageEvent.getUser().getName()) + response);
+        }
     }
 
-    @Override
-    public Boolean hasPermissions(ChannelMessageEvent messageEvent) {
-        if (messageEvent.getUser().getName().equals("prygoon")) {
-            return true;
-        } else {
-            return super.hasPermissions(messageEvent);
-        }
+    private boolean isSubOrMod(ChannelMessageEvent event) {
+        return event.getPermissions().contains(CommandPermission.MODERATOR)
+                || event.getPermissions().contains(CommandPermission.SUBSCRIBER)
+                || event.getPermissions().contains(CommandPermission.OWNER);
     }
 }

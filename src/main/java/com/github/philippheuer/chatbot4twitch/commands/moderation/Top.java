@@ -1,14 +1,21 @@
+
 package com.github.philippheuer.chatbot4twitch.commands.moderation;
 
-import com.github.philippheuer.chatbot4twitch.dbFeatures.ChannelData;
-import me.philippheuer.twitch4j.chat.commands.Command;
-import me.philippheuer.twitch4j.chat.commands.CommandPermission;
-import me.philippheuer.twitch4j.events.event.ChannelMessageEvent;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.User;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.dao.ChannelLogDao;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.dao.UserDao;
+import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
+import me.philippheuer.twitch4j.message.commands.Command;
+import me.philippheuer.twitch4j.message.commands.CommandPermission;
+
+import java.util.List;
 
 public class Top extends Command {
+
     /**
      * Initialize Command
      */
+
     public Top() {
         super();
 
@@ -21,17 +28,37 @@ public class Top extends Command {
         setUsageExample("");
     }
 
+
     /**
      * executeCommand Logic
      */
+
     @Override
     public void executeCommand(ChannelMessageEvent messageEvent) {
         super.executeCommand(messageEvent);
-        ChannelData channelData = new ChannelData(messageEvent);
+
+        String channel = "#" + messageEvent.getChannel().getName();
+        UserDao userDao = new UserDao();
+        ChannelLogDao logService = new ChannelLogDao();
+
         // Prepare Response
-        String response = channelData.getTopFlooders();
+        List<User> flooders = userDao.getTopFiveFlooders(channel);
+        StringBuilder builder = new StringBuilder(String.format("Нафлудили с %s. ", logService.getFirstData(channel)));
+
+        int n = flooders.size();
+        for (int i = 0; i < n; i++) {
+            builder.append(String.format("%s. %s: %s сообщений, %s слов.",
+                    i + 1,
+                    flooders.get(i).getDisplayNickname(),
+                    flooders.get(i).getMessageCount(),
+                    flooders.get(i).getWordCount()));
+            builder.append(" ");
+        }
+
+
+        String response = String.valueOf(builder).trim();
         // Send Response
-        sendMessageToChannel(messageEvent.getChannel().getName(), response);
+        sendMessageToChannel(channel.substring(1), response);
     }
 
     @Override
@@ -43,3 +70,4 @@ public class Top extends Command {
         }
     }
 }
+
