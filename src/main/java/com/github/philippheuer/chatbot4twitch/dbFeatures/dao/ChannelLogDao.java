@@ -69,9 +69,9 @@ public class ChannelLogDao extends SessionUtil implements ChannelLogDaoInterface
 
 
         String sql = "select log.message from ChannelLog log " +
-                "where log.channel like :channel " +
-                "and lower(log.nickname) like :nickname " +
-                "order by log.id desc";
+                "where log.channel = :channel " +
+                "and lower(log.nickname) = :nickname " +
+                "order by log.timestamp desc";
 
         openSession();
         Session session = getSession();

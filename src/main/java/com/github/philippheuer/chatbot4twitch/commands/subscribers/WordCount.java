@@ -44,24 +44,27 @@ public class WordCount extends Command {
     public void executeCommand(ChannelMessageEvent messageEvent) {
         super.executeCommand(messageEvent);
 
-        int wordCount = 0;
-        int messageCount = 0;
+        int wordCount;
+        int messageCount;
         String commandTarget = "";
         String response;
+        User user;
+        UserDao userDao = new UserDao();
+        Long twitchId = 0L;
 
         String displayNickname = messageEvent.getUser().getDisplayName();
         String nickname = messageEvent.getUser().getName();
         String channel = "#" + messageEvent.getChannel().getName();
-        Long twitchId = 0L;
-        UserDao userDao = new UserDao();
-        User user;
         ChannelLogDao logService = new ChannelLogDao();
         String firstDate = logService.getFirstData(channel);
 
         try {
             if (messageEvent.getMessage().split(" ").length > 1) {
                 commandTarget = messageEvent.getMessage().split(" ")[1];
-                twitchId = getTwitchClient().getUserEndpoint().getUserIdByUserName(commandTarget).get();
+                Optional<Long> optionalUserIdByUserName = getTwitchClient().getUserEndpoint().getUserIdByUserName(commandTarget);
+                if (optionalUserIdByUserName.isPresent()) {
+                    twitchId = optionalUserIdByUserName.get();
+                }
             } else {
                 commandTarget = displayNickname;
                 twitchId = messageEvent.getUser().getId();
@@ -87,7 +90,7 @@ public class WordCount extends Command {
                         commandTarget);
             }
             // Send Response
-            sendMessageToChannel(messageEvent.getChannel().getName(), response);
+            sendMessageToChannel(channel.substring(1), response);
 
         } catch (NoResultException ex) {
             user = new User();
@@ -102,7 +105,7 @@ public class WordCount extends Command {
                     displayNickname,
                     commandTarget);
 
-            sendMessageToChannel(messageEvent.getChannel().getName(), response);
+            sendMessageToChannel(channel.substring(1), response);
 
         } catch (NonUniqueResultException ex) {
             List<User> duplicateUsers = userDao.getDuplicateUsers(twitchId, channel);
@@ -127,7 +130,7 @@ public class WordCount extends Command {
                         rightUser.getMessageCount(),
                         firstDate);
 
-                sendMessageToChannel(messageEvent.getChannel().getName(), response);
+                sendMessageToChannel(channel.substring(1), response);
             }
         }
     }

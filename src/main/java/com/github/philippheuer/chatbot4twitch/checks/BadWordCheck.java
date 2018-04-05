@@ -42,15 +42,14 @@ public class BadWordCheck {
     public static int getCopyPasteCountFromDB(Event event) {
         if ((event instanceof IRCMessageEvent) && ((IRCMessageEvent) event).getCommandType().equals("PRIVMSG")) {
 
-
             String message = ((IRCMessageEvent) event).getMessage().orElse("");
             Long twitchId = ((IRCMessageEvent) event).getUserId();
             String channel = "#" + ((IRCMessageEvent) event).getChannelName().orElse("");
-            String nickname = getDisplayNameFromRawMessage(((IRCMessageEvent) event).getRawMessage());
+            //String nickname = getDisplayNameFromRawMessage(((IRCMessageEvent) event).getRawMessage());
 
-            if (nickname.equals("") && ((IRCMessageEvent) event).getClientName().isPresent()) {
+            /*if (nickname.equals("") && ((IRCMessageEvent) event).getClientName().isPresent()) {
                 nickname = ((IRCMessageEvent) event).getClientName().get();
-            }
+            }*/
 
             try {
                 if (!message.equals("")) {
@@ -58,7 +57,7 @@ public class BadWordCheck {
                     ChannelLogDao logDao = new ChannelLogDao();
                     User user = userDao.getUserByIdAndChannel(twitchId, channel);
                     int copypasteCounter = user.getCopypasteCount();
-                    String previousMessage = logDao.getPreviousMessage(nickname, channel);
+                    String previousMessage = logDao.getPreviousMessage(user.getDisplayNickname(), channel);
 
                     if (isSub(event) || isMod(event)) {
                         return 0;
@@ -82,7 +81,7 @@ public class BadWordCheck {
         return 0;
     }
 
-    private static String getDisplayNameFromRawMessage(String message) {
+    /*private static String getDisplayNameFromRawMessage(String message) {
         String[] strings = message.split("[=;]");
         for (int i = 0; i < strings.length; i++) {
             if (strings[i].equals("display-name")) {
@@ -90,7 +89,7 @@ public class BadWordCheck {
             }
         }
         return "";
-    }
+    }*/
 
     private static int leviAlg(String S1, String S2) {
         int m = S1.length(), n = S2.length();
