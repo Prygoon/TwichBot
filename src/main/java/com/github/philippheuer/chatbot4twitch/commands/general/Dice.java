@@ -3,6 +3,7 @@ package com.github.philippheuer.chatbot4twitch.commands.general;
 import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
 import me.philippheuer.twitch4j.message.commands.Command;
 import me.philippheuer.twitch4j.message.commands.CommandPermission;
+
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Dice extends Command {

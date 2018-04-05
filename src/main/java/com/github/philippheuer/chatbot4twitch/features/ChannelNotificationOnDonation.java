@@ -12,7 +12,7 @@ public class ChannelNotificationOnDonation {
     public void onDonation(DonationEvent event) {
         String message = String.format("%s задонатил %s через %s!", event.getUser().getDisplayName(), event.getAmount(), event.getSource());
 
-        event.getClient().getMessageInterface().sendMessage(event.getChannel().getName(), message);
+        event.sendMessage(message);
     }
 
 }

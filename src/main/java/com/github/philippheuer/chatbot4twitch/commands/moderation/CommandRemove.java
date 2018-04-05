@@ -3,6 +3,7 @@ package com.github.philippheuer.chatbot4twitch.commands.moderation;
 import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
 import me.philippheuer.twitch4j.message.commands.Command;
 import me.philippheuer.twitch4j.message.commands.CommandPermission;
+
 import java.util.Optional;
 
 public class CommandRemove extends Command {

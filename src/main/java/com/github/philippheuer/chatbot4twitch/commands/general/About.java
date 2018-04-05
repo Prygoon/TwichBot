@@ -28,7 +28,7 @@ public class About extends Command {
         super.executeCommand(messageEvent);
 
         // Prepare Response
-        String response = String.format("This bot was created using the Twitch4J API.");
+        String response = "This bot was created using the Twitch4J API.";
 
         // Send Response
         sendMessageToChannel(messageEvent.getChannel().getName(), response);

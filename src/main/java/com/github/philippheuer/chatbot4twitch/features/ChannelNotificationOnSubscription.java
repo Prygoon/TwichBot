@@ -12,13 +12,12 @@ public class ChannelNotificationOnSubscription {
     @EventSubscriber
     public void onSubscription(SubscriptionEvent event) {
         String message;
-        SubPlan subPlan = null;
+        SubPlan subPlan;
         int streak = event.getSubscription().getStreak();
         int streakEnds = streak;
         String[] months = {"месяц", "месяца", "месяцев"};
         String plan = "";
         String month;
-
         subPlan = event.getSubscription().getSubPlan();
 
         assert subPlan != null;
