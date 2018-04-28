@@ -55,3 +55,4 @@ client.log
 Будет удалено src/test/
 Будет удалено modules/
 Будет удалено src/main/java/com/github/philippheuer/chatbot4twitch/dbFeatures/service/
+/logback.groovy
