@@ -1,5 +1,6 @@
 package com.github.philippheuer.chatbot4twitch.dbFeatures;
 
+import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -16,21 +17,26 @@ public class SessionUtil {
         return transaction;
     }
 
-    protected void openSession() {
-        session = HibernateUtil.getSessionFactory().openSession();
+    public void openSession() {
+
+        session = HibernateUtil.getSessionFactory()
+                /*.withOptions()
+                .autoClear(true)
+                .flushMode(FlushMode.ALWAYS)*/
+                .openSession();
     }
 
-    protected void openTransactionSession() {
+    public void openTransactionSession() {
         openSession();
         transaction = session.beginTransaction();
     }
 
-    protected void closeSession() {
+    public void closeSession() {
         session.close();
     }
 
-    protected void closeTransactionSession() {
-        transaction.commit();
+    public void closeTransactionSession() {
+        session.getTransaction().commit();
         closeSession();
     }
 }

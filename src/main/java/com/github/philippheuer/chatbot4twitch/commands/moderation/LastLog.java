@@ -1,8 +1,8 @@
 
 package com.github.philippheuer.chatbot4twitch.commands.moderation;
 
-import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.ChannelLog;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.dao.ChannelLogDao;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.ChannelLog;
 import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
 import me.philippheuer.twitch4j.message.commands.Command;
 import me.philippheuer.twitch4j.message.commands.CommandPermission;
@@ -44,6 +44,8 @@ public class LastLog extends Command {
         String nickname = messageEvent.getUser().getDisplayName();
         String channel = "#" + messageEvent.getChannel().getName();
         String commandTarget;
+        ChannelLogDao logDao = new ChannelLogDao();
+
         if (messageEvent.getMessage().split(" ").length > 1) {
             commandTarget = messageEvent.getMessage().split(" ")[1];
         } else {
@@ -51,8 +53,7 @@ public class LastLog extends Command {
         }
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("[yyyy-MM-dd HH:mm:ss]");
-        ChannelLogDao logService = new ChannelLogDao();
-        Stack<ChannelLog> lastLog = logService.getLastLog(channel, commandTarget);
+        Stack<ChannelLog> lastLog = logDao.getLastLog(channel, commandTarget);
         int lastLogSize = lastLog.size();
 
         if (!lastLog.empty()) {
@@ -61,7 +62,7 @@ public class LastLog extends Command {
                 String date = dateFormat.format(log.getTimestamp());
                 String logNickname = log.getNickname();
                 String logMessage = log.getMessage();
-                String response = date + " " + logNickname + ":" + logMessage;
+                String response = date + " " + logNickname + ": " + logMessage;
                 // Send Response
                 if (isOwner(messageEvent) || nickname.toLowerCase().equals("prygoon")) {
                     sendMessageToChannel(channel.substring(1), String.format("@%s " + response, nickname));

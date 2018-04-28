@@ -40,7 +40,7 @@ public class FollowAge extends Command {
         // Response
         // Following
 
-        String response = follow.map(follow1 -> String.format("@%s ты подписан на %s c %s!", commandTarget.getDisplayName(),
+        String response = follow.map(follow1 -> String.format("@%s ты подписан(а) на %s c %s!", commandTarget.getDisplayName(),
                 messageEvent.getChannel().getDisplayName(),
                 (dateFormat.format(follow1.getCreatedAt()))))
                 // Not Following

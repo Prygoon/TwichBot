@@ -15,6 +15,7 @@ import static com.github.philippheuer.chatbot4twitch.features.WordFilter.isSub;
 
 
 public class BadWordCheck {
+
     public static boolean isQuest(String message) {
         return (message.toLowerCase().matches(".*(80|160).*(#\\d{4,5}).*") || message.toLowerCase().matches(".*(#\\d{4,5}).*(80|160).*"));
     }
@@ -39,57 +40,32 @@ public class BadWordCheck {
         return count;
     }
 
-    public static int getCopyPasteCountFromDB(Event event) {
-        if ((event instanceof IRCMessageEvent) && ((IRCMessageEvent) event).getCommandType().equals("PRIVMSG")) {
+    public static void copyPasteHandler(User user, IRCMessageEvent event) {
 
-            String message = ((IRCMessageEvent) event).getMessage().orElse("");
-            Long twitchId = ((IRCMessageEvent) event).getUserId();
-            String channel = "#" + ((IRCMessageEvent) event).getChannelName().orElse("");
-            //String nickname = getDisplayNameFromRawMessage(((IRCMessageEvent) event).getRawMessage());
+        ChannelLogDao logDao = new ChannelLogDao();
+        String message = event.getMessage().orElse("");
+        String channel = "#" + event.getChannelName().orElse("");
 
-            /*if (nickname.equals("") && ((IRCMessageEvent) event).getClientName().isPresent()) {
-                nickname = ((IRCMessageEvent) event).getClientName().get();
-            }*/
+        try {
+            if (!message.equals("") && user != null) {
 
-            try {
-                if (!message.equals("")) {
-                    UserDao userDao = new UserDao();
-                    ChannelLogDao logDao = new ChannelLogDao();
-                    User user = userDao.getUserByIdAndChannel(twitchId, channel);
-                    int copypasteCounter = user.getCopypasteCount();
-                    String previousMessage = logDao.getPreviousMessage(user.getDisplayNickname(), channel);
+                int copypasteCounter = user.getCopypasteCount();
+                String previousMessage = logDao.getPreviousMessage(user.getDisplayNickname(), channel);
 
-                    if (isSub(event) || isMod(event)) {
-                        return 0;
-                    }
+                if ((previousMessage != null) && ((leviAlg(previousMessage, message) < (message.length() / 4)) && (message.length() > 25))) {
+                    user.setCopypasteCount(++copypasteCounter);
 
-                    if ((previousMessage != null) && ((leviAlg(previousMessage, message) < (message.length() / 4)) && (message.length() > 25))) {
-                        user.setCopypasteCount(++copypasteCounter);
-                        userDao.updateUser(user);
-                    } else {
-                        user.setCopypasteCount(0);
-                        userDao.updateUser(user);
-                        copypasteCounter = 0;
-                    }
-                    return copypasteCounter;
+                } else {
+                    user.setCopypasteCount(0);
                 }
-
-            } catch (NoResultException | NonUniqueResultException ignored) {
-
             }
+
+        } catch (NoResultException | NonUniqueResultException ignored) {
+
+        } catch (NullPointerException ex) {
+            logDao.getSession().close();
         }
-        return 0;
     }
-
-    /*private static String getDisplayNameFromRawMessage(String message) {
-        String[] strings = message.split("[=;]");
-        for (int i = 0; i < strings.length; i++) {
-            if (strings[i].equals("display-name")) {
-                return strings[i + 1];
-            }
-        }
-        return "";
-    }*/
 
     private static int leviAlg(String S1, String S2) {
         int m = S1.length(), n = S2.length();

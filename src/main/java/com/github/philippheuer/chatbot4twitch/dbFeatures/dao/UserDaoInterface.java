@@ -13,7 +13,7 @@ public interface UserDaoInterface {
 
     User getUserByNicknameAndChannel(String nickname, String channel);
 
-    User getUserByIdAndChannel (Long userId, String channel);
+    User getUserByTwitchIdAndChannel(Long userId, String channel);
 
     List<User> getTopFiveFlooders (String channel);
 

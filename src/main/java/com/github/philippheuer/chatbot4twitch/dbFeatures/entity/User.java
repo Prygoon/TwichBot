@@ -5,11 +5,12 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "newusers")
-public class User implements Serializable{
+public class User implements Serializable {
 
-    @Id
+    @EmbeddedId
+    private UserCompositeId compositeId;
+
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column(name = "display_nickname")
@@ -17,9 +18,6 @@ public class User implements Serializable{
 
     @Column(name = "nickname")
     private String nickname;
-
-    @Column(name = "channel")
-    private String channel;
 
     @Column(name = "copypaste_count")
     private int copypasteCount;
@@ -33,10 +31,15 @@ public class User implements Serializable{
     @Column(name = "ban_count")
     private int banCount;
 
-    @Column(name = "twitch_id")
-    private Long twitchId ;
-
     public User() {
+    }
+
+    public UserCompositeId getCompositeId() {
+        return compositeId;
+    }
+
+    public void setCompositeId(UserCompositeId compositeId) {
+        this.compositeId = compositeId;
     }
 
     public int getId() {
@@ -61,14 +64,6 @@ public class User implements Serializable{
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
-    }
-
-    public String getChannel() {
-        return channel;
-    }
-
-    public void setChannel(String channel) {
-        this.channel = channel;
     }
 
     public int getCopypasteCount() {
@@ -103,11 +98,4 @@ public class User implements Serializable{
         this.banCount = banCount;
     }
 
-    public long getTwitchId() {
-        return twitchId;
-    }
-
-    public void setTwitchId(long twitchId) {
-        this.twitchId = twitchId;
-    }
 }

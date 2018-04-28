@@ -44,6 +44,9 @@ dependencies {
     //Hibernate
     //https://mvnrepository.com/artifact/org.hibernate/hibernate-gradle-plugin
     compile group: 'org.hibernate', name: 'hibernate-gradle-plugin', version: '5.2.10.Final'
+    // https://mvnrepository.com/artifact/org.hibernate/hibernate-c3p0
+    compile group: 'org.hibernate', name: 'hibernate-c3p0', version: '5.1.0.Final'
+
 
     //Spring transactions
     // https://mvnrepository.com/artifact/org.springframework/spring-tx

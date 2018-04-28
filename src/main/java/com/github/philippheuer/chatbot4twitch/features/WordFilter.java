@@ -1,8 +1,13 @@
 package com.github.philippheuer.chatbot4twitch.features;
 
+import com.github.philippheuer.chatbot4twitch.dbFeatures.dao.UserDao;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.User;
 import me.philippheuer.twitch4j.events.Event;
 import me.philippheuer.twitch4j.events.EventSubscriber;
 import me.philippheuer.twitch4j.events.event.irc.IRCMessageEvent;
+import org.hibernate.NonUniqueResultException;
+
+import javax.persistence.NoResultException;
 
 import static com.github.philippheuer.chatbot4twitch.checks.BadWordCheck.*;
 
@@ -11,11 +16,25 @@ public class WordFilter {
     @EventSubscriber
     public void onChannelMessage(IRCMessageEvent event) {
         if (event.getCommandType().equals("PRIVMSG")) {
+            UserDao userDao = new UserDao();
             String message = event.getMessage().orElse("");
             String nickname = event.getClientName().orElse("");
             String channel = event.getChannelName().orElse("");
-            int copyasteCounter = getCopyPasteCountFromDB(event);
+            Long twitchId = event.getUserId();
             final int MAX_SPAM_COUNT = 2;
+            int copyasteCounter = 0;
+
+            if (!(isMod(event) || isSub(event) || isOwner(event))) {
+                try {
+                    User user = userDao.getUserByTwitchIdAndChannel(twitchId, "#" + channel);
+                    copyPasteHandler(user, event);
+                    userDao.updateUser(user);
+                    copyasteCounter = user.getCopypasteCount();
+                } catch (NoResultException | NonUniqueResultException | NullPointerException ex) {
+                    userDao.getSession().close();
+                }
+
+            }
 
             if (!(message.equals("") && nickname.equals(""))) {
                 if (isGoose(message)) {
@@ -67,6 +86,13 @@ public class WordFilter {
     }
 
     public static boolean isOwner(Event event) {
-        return (event instanceof IRCMessageEvent && ((IRCMessageEvent) event).getBadges().containsKey("broadcaster"));
+        final long PRYGOONTWITCHID = 21562266L;
+        if (event instanceof IRCMessageEvent) {
+            if (((IRCMessageEvent) event).getBadges().containsKey("broadcaster")) {
+                return true;
+            } else return ((IRCMessageEvent) event).getUserId() == PRYGOONTWITCHID;
+        } else {
+            return false;
+        }
     }
 }

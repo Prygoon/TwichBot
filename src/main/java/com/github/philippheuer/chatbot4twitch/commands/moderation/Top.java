@@ -12,6 +12,7 @@ import java.util.List;
 
 public class Top extends Command {
 
+
     /**
      * Initialize Command
      */
@@ -38,12 +39,11 @@ public class Top extends Command {
         super.executeCommand(messageEvent);
 
         String channel = "#" + messageEvent.getChannel().getName();
+        ChannelLogDao logDao = new ChannelLogDao();
         UserDao userDao = new UserDao();
-        ChannelLogDao logService = new ChannelLogDao();
-
         // Prepare Response
         List<User> flooders = userDao.getTopFiveFlooders(channel);
-        StringBuilder builder = new StringBuilder(String.format("Нафлудили с %s. ", logService.getFirstData(channel)));
+        StringBuilder builder = new StringBuilder(String.format("Нафлудили с %s. ", logDao.getFirstData(channel)));
 
         int n = flooders.size();
         for (int i = 0; i < n; i++) {

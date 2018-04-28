@@ -9,6 +9,8 @@ public interface ChannelLogDaoInterface {
 
     void addLog(ChannelLog log);
 
+    void addBatchOfLogs (List<ChannelLog> logs);
+
     String getFirstData(String channel);
 
     List<ChannelLog> getLastLog(String channel, String nickname);

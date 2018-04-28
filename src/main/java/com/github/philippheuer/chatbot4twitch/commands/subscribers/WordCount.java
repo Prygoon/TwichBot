@@ -4,6 +4,7 @@ package com.github.philippheuer.chatbot4twitch.commands.subscribers;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.User;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.dao.ChannelLogDao;
 import com.github.philippheuer.chatbot4twitch.dbFeatures.dao.UserDao;
+import com.github.philippheuer.chatbot4twitch.dbFeatures.entity.UserCompositeId;
 import me.philippheuer.twitch4j.events.event.irc.ChannelMessageEvent;
 import me.philippheuer.twitch4j.message.commands.Command;
 import me.philippheuer.twitch4j.message.commands.CommandPermission;
@@ -49,14 +50,13 @@ public class WordCount extends Command {
         String commandTarget = "";
         String response;
         User user;
-        UserDao userDao = new UserDao();
         Long twitchId = 0L;
-
+        ChannelLogDao logDao = new ChannelLogDao();
+        UserDao userDao = new UserDao();
         String displayNickname = messageEvent.getUser().getDisplayName();
         String nickname = messageEvent.getUser().getName();
         String channel = "#" + messageEvent.getChannel().getName();
-        ChannelLogDao logService = new ChannelLogDao();
-        String firstDate = logService.getFirstData(channel);
+        String firstDate = logDao.getFirstData(channel);
 
         try {
             if (messageEvent.getMessage().split(" ").length > 1) {
@@ -71,7 +71,7 @@ public class WordCount extends Command {
             }
 
 
-            user = userDao.getUserByIdAndChannel(twitchId, channel);
+            user = userDao.getUserByTwitchIdAndChannel(twitchId, channel);
 
             wordCount = user.getWordCount();
             messageCount = user.getMessageCount();
@@ -85,7 +85,7 @@ public class WordCount extends Command {
                         messageCount,
                         firstDate);
             } else {
-                response = String.format("@%s , %s еще ничего не сказал на этом канале.",
+                response = String.format("@%s , %s еще ничего не сказал(а) на этом канале.",
                         displayNickname,
                         commandTarget);
             }
@@ -96,12 +96,14 @@ public class WordCount extends Command {
             user = new User();
             user.setDisplayNickname(displayNickname);
             user.setNickname(nickname);
-            user.setChannel(channel);
-            user.setTwitchId(twitchId);
+            UserCompositeId compositeId = new UserCompositeId();
+            compositeId.setChannel(channel);
+            compositeId.setTwitchId(twitchId);
+            user.setCompositeId(compositeId);
 
             userDao.addUser(user);
 
-            response = String.format("@%s , %s еще ничего не сказал на этом канале.",
+            response = String.format("@%s , %s еще ничего не сказал(а) на этом канале.",
                     displayNickname,
                     commandTarget);
 
